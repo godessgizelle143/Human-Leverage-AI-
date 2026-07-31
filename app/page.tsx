@@ -1,0 +1,176 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Sparkles, MessageSquare, FileText, Download, Zap, Shield, BarChart3, ArrowRight } from 'lucide-react'
+import Footer from '@/components/layout/Footer'
+
+export default function LandingPage() {
+  return (
+    <main className="min-h-screen bg-brand-black">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 glass border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-brand-gold" />
+            <span className="text-xl font-bold gradient-text">Human Leverage AI™</span>
+          </div>
+          <div className="hidden md:flex items-center gap-8">
+            <a href="#how-it-works" className="text-white/70 hover:text-white transition-colors">How It Works</a>
+            <a href="#features" className="text-white/70 hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="text-white/70 hover:text-white transition-colors">Pricing</a>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-white/70 hover:text-white transition-colors">Sign In</Link>
+            <Link href="/register" className="btn-primary text-sm">Get Started</Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-radial from-brand-gold/5 via-transparent to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-pink/5 rounded-full blur-3xl" />
+        
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
+            <Sparkles className="w-4 h-4 text-brand-gold" />
+            <span className="text-sm text-white/80">AI-Powered Business Builder</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <span className="text-white">Speak Once.</span>
+            <br />
+            <span className="gradient-text">Build Forever.</span>
+          </h1>
+          
+          <p className="text-xl text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Transform a single AI conversation into a complete digital business. 
+            Websites, content, marketing materials — all generated from your voice.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/register" className="btn-primary text-lg px-8 py-4 flex items-center gap-2">
+              Start Free 3-Day Trial
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <a href="#pricing" className="btn-secondary text-lg px-8 py-4">
+              View Pricing Plans
+            </a>
+          </div>
+
+          <p className="mt-6 text-sm text-white/40">No credit card required for trial</p>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">How It Works</h2>
+            <p className="text-white/60 text-lg">Four simple steps to your complete digital business</p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              { step: '01', title: 'Start Interview', desc: 'Answer 15 guided AI questions about your business, brand, and goals.', icon: MessageSquare },
+              { step: '02', title: 'AI Processes', desc: 'Our AI analyzes your responses and builds your complete business profile.', icon: Zap },
+              { step: '03', title: 'Content Generated', desc: 'Website copy, marketing materials, social posts, and more \u2014 all created instantly.', icon: FileText },
+              { step: '04', title: 'Download & Deploy', desc: 'Export everything as professional PDFs ready to use immediately.', icon: Download },
+            ].map((item) => (
+              <div key={item.step} className="glass rounded-2xl p-6 glass-hover transition-all duration-300">
+                <div className="text-brand-gold font-bold text-sm mb-3">{item.step}</div>
+                <item.icon className="w-8 h-8 text-brand-pink mb-4" />
+                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="py-20 px-6 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">Powerful Features</h2>
+            <p className="text-white/60 text-lg">Everything you need to build and scale your digital presence</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { title: 'AI Interview Engine', desc: 'Guided 15-question interview powered by GPT-4 that extracts your unique business essence.', icon: MessageSquare },
+              { title: 'Smart Content Generation', desc: 'Automatically generates website copy, taglines, about pages, and service descriptions.', icon: FileText },
+              { title: 'PDF Export Suite', desc: 'Download professional documents ready for immediate use in your business.', icon: Download },
+              { title: 'Lightning Fast', desc: 'Complete business materials generated in under 5 minutes from a single conversation.', icon: Zap },
+              { title: 'Enterprise Security', desc: 'Bank-grade encryption protects your business data and intellectual property.', icon: Shield },
+              { title: 'Usage Analytics', desc: 'Track your interviews, builds, and content generation with detailed dashboards.', icon: BarChart3 },
+            ].map((feature) => (
+              <div key={feature.title} className="glass rounded-2xl p-8 glass-hover transition-all duration-300 group">
+                <feature.icon className="w-10 h-10 text-brand-gold mb-4 group-hover:text-brand-pink transition-colors" />
+                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                <p className="text-white/50 leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-20 px-6 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">Simple Pricing</h2>
+            <p className="text-white/60 text-lg">Choose the plan that fits your ambition</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              { name: 'Creator', price: '$47', period: '/month', features: ['5 AI interviews/month', '5 content builds/month', 'PDF exports', 'Email support'], highlight: false },
+              { name: 'Professional', price: '$97', period: '/month', features: ['25 AI interviews/month', '25 content builds/month', 'Priority PDF exports', 'Priority support', 'Advanced templates'], highlight: true },
+              { name: 'Business Pro', price: '$197', period: '/month', features: ['Unlimited interviews', 'Unlimited builds', 'Premium templates', 'Dedicated support', 'API access', 'White-label options'], highlight: false },
+            ].map((plan) => (
+              <div key={plan.name} className={`rounded-2xl p-8 transition-all duration-300 ${plan.highlight ? 'bg-gradient-to-b from-brand-gold/10 to-brand-pink/10 border border-brand-gold/30 scale-105' : 'glass glass-hover'}`}>
+                {plan.highlight && <div className="text-brand-gold text-sm font-semibold mb-2">Most Popular</div>}
+                <h3 className="text-2xl font-bold mb-1">{plan.name}</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-bold gradient-text">{plan.price}</span>
+                  <span className="text-white/40">{plan.period}</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-white/70">
+                      <Sparkles className="w-4 h-4 text-brand-gold flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/register" className={plan.highlight ? 'btn-primary w-full block text-center' : 'btn-secondary w-full block text-center'}>
+                  Get Started
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6 border-t border-white/5">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            Ready to <span className="gradient-text">Build Your Empire?</span>
+          </h2>
+          <p className="text-xl text-white/60 mb-10">
+            Join thousands of entrepreneurs who turned one conversation into a thriving digital business.
+          </p>
+          <Link href="/register" className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2">
+            Start Your Free Trial
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
+      </section>
+
+      <Footer />
+    </main>
+  )
+}
