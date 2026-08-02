@@ -16,8 +16,11 @@ export async function GET(request: Request) {
       {
         cookies: {
           get(name: string) {
-            return request.headers
-              .split('cookie')
+            const cookie = request.headers.get('cookie')
+            return cookie
+              ?.split('; ')
+              .find((row) => row.startsWith(`${name}=`))
+              ?.split('=')[1]
           },
           set(name: string, value: string, options: any) {
             response.cookies.set({
