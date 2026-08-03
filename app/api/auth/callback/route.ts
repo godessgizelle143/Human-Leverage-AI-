@@ -3,10 +3,11 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
+
   const code = searchParams.get('code')
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login`)
+    return NextResponse.redirect(`${origin}/login?error=no_code`)
   }
 
   const response = NextResponse.redirect(`${origin}/dashboard`)
@@ -17,24 +18,21 @@ export async function GET(request: Request) {
     {
       cookies: {
         getAll() {
-          const cookieHeader = request.headers.get('cookie')
+          return request.headers
+            .get('cookie')
+            ?.split(';')
+            .map((cookie) => {
+              const [name, ...rest] = cookie.trim().split('=')
 
-          if (!cookieHeader) {
-            return []
-          }
-
-          return cookieHeader.split('; ').map((cookie) => {
-            const [name, ...rest] = cookie.split('=')
-
-            return {
-              name,
-              value: rest.join('='),
-            }
-          })
+              return {
+                name,
+                value: rest.join('='),
+              }
+            }) ?? []
         },
 
         setAll(
-          cookiesToSet: Array<{
+          cookiesToSet: {
             name: string
             value: string
             options?: {
@@ -46,17 +44,27 @@ export async function GET(request: Request) {
               secure?: boolean
               sameSite?: 'lax' | 'strict' | 'none'
             }
-          }>
+          }[]
         ) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options)
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
           })
         },
       },
     }
   )
 
-  await supabase.auth.exchangeCodeForSession(code)
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+  if (error) {
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(error.message)}`
+    )
+  }
 
   return response
 }
