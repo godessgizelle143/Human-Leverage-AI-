@@ -1,22 +1,21 @@
 import { createServerClient } from '@supabase/ssr'
-import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url)
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url)
 
-  const code = url.searchParams.get('code')
+  const code = searchParams.get('code')
 
   if (!code) {
     console.log('NO AUTH CODE RECEIVED')
 
     return NextResponse.redirect(
-      new URL('/login?error=no_code', request.url)
+      `${origin}/login?error=no-code`
     )
   }
 
-  const response = NextResponse.redirect(
-    new URL('/dashboard', request.url)
-  )
+  const cookieStore = await cookies()
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,54 +23,46 @@ export async function GET(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          return cookieStore.getAll()
         },
 
-        setAll(
-          cookiesToSet: Array<{
-            name: string
-            value: string
-            options?: {
-              path?: string
-              domain?: string
-              maxAge?: number
-              expires?: Date
-              httpOnly?: boolean
-              secure?: boolean
-              sameSite?: 'lax' | 'strict' | 'none'
-            }
-          }>
-        ) {
+        setAll(cookiesToSet: {
+          name: string
+          value: string
+          options?: object
+        }[]) {
+
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set({
+            cookieStore.set(
               name,
               value,
-              ...options,
-            })
+              options
+            )
           })
+
         },
       },
     }
   )
 
-  const { error } =
-    await supabase.auth.exchangeCodeForSession(code)
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
+
 
   if (error) {
+
     console.log(
       'AUTH CALLBACK ERROR:',
       error.message
     )
 
     return NextResponse.redirect(
-      new URL(
-        `/login?error=${encodeURIComponent(error.message)}`,
-        request.url
-      )
+      `${origin}/login?error=${encodeURIComponent(error.message)}`
     )
   }
 
-  console.log('AUTH SUCCESS - REDIRECTING TO DASHBOARD')
 
-  return response
+  return NextResponse.redirect(
+    `${origin}/dashboard`
+  )
 }
