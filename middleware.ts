@@ -48,28 +48,11 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  const protectedRoutes = [
-    '/dashboard',
-    '/interview',
-    '/projects',
-    '/downloads',
-    '/subscription',
-    '/settings',
-  ]
-
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  )
-
-  if (isProtectedRoute && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-
   if (
-    (pathname === '/login' || pathname === '/register') &&
-    user
+    pathname.startsWith('/dashboard') &&
+    !user
   ) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   return response
@@ -78,12 +61,12 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/login',
+    '/register',
     '/interview/:path*',
     '/projects/:path*',
     '/downloads/:path*',
     '/subscription/:path*',
     '/settings/:path*',
-    '/login',
-    '/register',
   ],
 }
