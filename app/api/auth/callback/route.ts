@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+
 
 export async function GET(request: Request) {
 
@@ -7,64 +9,96 @@ export async function GET(request: Request) {
 
   const code = searchParams.get('code')
 
-  const origin = new URL(request.url).origin
-
 
   if (!code) {
+
     return NextResponse.redirect(
-      `${origin}/login?error=no-code`
+      new URL('/login?error=no-code', request.url)
     )
+
   }
 
 
-  const response = NextResponse.redirect(
-    `${origin}/dashboard`
-  )
+  const cookieStore = await cookies()
 
 
   const supabase = createServerClient(
+
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+
     {
+
       cookies: {
+
         getAll() {
-          return request.cookies.getAll()
+
+          return cookieStore.getAll()
+
         },
+
 
         setAll(cookiesToSet) {
 
-          cookiesToSet.forEach(({ name, value, options }) => {
+          try {
 
-            response.cookies.set(
-              name,
-              value,
-              options
+            cookiesToSet.forEach(
+              ({ name, value, options }) => {
+
+                cookieStore.set(
+                  name,
+                  value,
+                  options
+                )
+
+              }
             )
 
-          })
+          } catch {
+
+          }
 
         },
+
       },
+
     }
+
   )
+
 
 
   const { error } =
     await supabase.auth.exchangeCodeForSession(code)
 
 
+
   if (error) {
 
     console.log(
-      "AUTH CALLBACK ERROR:",
+      "CALLBACK ERROR:",
       error.message
     )
 
+
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(error.message)}`
+
+      new URL(
+        `/login?error=${encodeURIComponent(error.message)}`,
+        request.url
+      )
+
     )
+
   }
 
 
-  return response
+
+  return NextResponse.redirect(
+
+    new URL('/dashboard', request.url)
+
+  )
+
 }
