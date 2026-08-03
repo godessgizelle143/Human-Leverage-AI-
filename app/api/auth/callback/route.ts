@@ -17,6 +17,10 @@ export async function GET(request: Request) {
 
   const cookieStore = await cookies()
 
+  const response = NextResponse.redirect(
+    `${origin}/dashboard`
+  )
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,31 +30,23 @@ export async function GET(request: Request) {
           return cookieStore.getAll()
         },
 
-        setAll(cookiesToSet: {
-          name: string
-          value: string
-          options?: object
-        }[]) {
-
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(
+            response.cookies.set(
               name,
               value,
               options
             )
           })
-
         },
       },
     }
   )
 
-
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
-
+  const { error } =
+    await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-
     console.log(
       'AUTH CALLBACK ERROR:',
       error.message
@@ -61,8 +57,5 @@ export async function GET(request: Request) {
     )
   }
 
-
-  return NextResponse.redirect(
-    `${origin}/dashboard`
-  )
+  return response
 }
