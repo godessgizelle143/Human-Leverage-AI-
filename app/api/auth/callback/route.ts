@@ -1,16 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
 
   const code = searchParams.get('code')
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=no_code`)
+    return NextResponse.redirect(
+      `${origin}/login?error=no_code`
+    )
   }
 
-  const response = NextResponse.redirect(`${origin}/dashboard`)
+  let response = NextResponse.redirect(
+    `${origin}/dashboard`
+  )
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,35 +22,17 @@ export async function GET(request: Request) {
     {
       cookies: {
         getAll() {
-          return request.headers
-            .get('cookie')
-            ?.split(';')
-            .map((cookie) => {
-              const [name, ...rest] = cookie.trim().split('=')
-
-              return {
-                name,
-                value: rest.join('='),
-              }
-            }) ?? []
+          return request.cookies.getAll()
         },
 
-        setAll(
-          cookiesToSet: {
-            name: string
-            value: string
-            options?: {
-              path?: string
-              domain?: string
-              maxAge?: number
-              expires?: Date
-              httpOnly?: boolean
-              secure?: boolean
-              sameSite?: 'lax' | 'strict' | 'none'
-            }
-          }[]
-        ) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+
             response.cookies.set({
               name,
               value,
@@ -58,7 +44,8 @@ export async function GET(request: Request) {
     }
   )
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  const { error } =
+    await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
     return NextResponse.redirect(
