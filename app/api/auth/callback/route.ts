@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -27,20 +27,8 @@ export async function GET(request: NextRequest) {
           return request.cookies.getAll()
         },
 
-        setAll(
-          cookiesToSet: {
-            name: string
-            value: string
-            options?: CookieOptions
-          }[]
-        ) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set({
-              name,
-              value,
-              ...options,
-            })
-
             response.cookies.set({
               name,
               value,
@@ -55,14 +43,17 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    console.log('AUTH CALLBACK ERROR:', error.message)
+    console.log(
+      'AUTH CALLBACK ERROR:',
+      error.message
+    )
 
     return NextResponse.redirect(
       `${origin}/login?error=${encodeURIComponent(error.message)}`
     )
   }
 
-  console.log('AUTH CALLBACK SUCCESS')
+  console.log('AUTH SUCCESS - REDIRECTING TO DASHBOARD')
 
   return response
 }
