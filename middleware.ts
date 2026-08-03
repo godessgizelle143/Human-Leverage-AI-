@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+  import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -18,11 +18,11 @@ export async function middleware(request: NextRequest) {
         },
 
         setAll(
-          cookiesToSet: Array<{
+          cookiesToSet: {
             name: string
             value: string
             options?: CookieOptions
-          }>
+          }[]
         ) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set({
@@ -62,18 +62,14 @@ export async function middleware(request: NextRequest) {
   )
 
   if (isProtectedRoute && !user) {
-    return NextResponse.redirect(
-      new URL('/login', request.url)
-    )
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (
     (pathname === '/login' || pathname === '/register') &&
     user
   ) {
-    return NextResponse.redirect(
-      new URL('/dashboard', request.url)
-    )
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return response
