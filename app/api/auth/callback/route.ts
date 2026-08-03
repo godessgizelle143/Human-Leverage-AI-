@@ -40,29 +40,23 @@ export async function GET(request: NextRequest) {
             }
           }>
         ) {
-          cookiesToSet.forEach(
-            ({ name, value, options }) => {
-              response.cookies.set({
-                name,
-                value,
-                ...options,
-              })
-            }
-          )
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+          })
         },
       },
     }
   )
 
-  const { error } = await supabase.auth.exchangeCodeForSession(
-    code
-  )
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(
-        error.message
-      )}`
+      `${origin}/login?error=${encodeURIComponent(error.message)}`
     )
   }
 
