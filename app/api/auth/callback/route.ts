@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -27,14 +27,22 @@ export async function GET(request: NextRequest) {
           return request.cookies.getAll()
         },
 
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set({
-              name,
-              value,
-              ...options,
-            })
-          })
+        setAll(
+          cookiesToSet: {
+            name: string
+            value: string
+            options?: CookieOptions
+          }[]
+        ) {
+          cookiesToSet.forEach(
+            ({ name, value, options }) => {
+              response.cookies.set({
+                name,
+                value,
+                ...options,
+              })
+            }
+          )
         },
       },
     }
@@ -52,8 +60,6 @@ export async function GET(request: NextRequest) {
       `${origin}/login?error=${encodeURIComponent(error.message)}`
     )
   }
-
-  console.log('AUTH SUCCESS - REDIRECTING TO DASHBOARD')
 
   return response
 }
