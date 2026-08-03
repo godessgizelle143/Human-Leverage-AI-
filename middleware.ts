@@ -18,11 +18,11 @@ export async function middleware(request: NextRequest) {
         },
 
         setAll(
-          cookiesToSet: {
+          cookiesToSet: Array<{
             name: string
             value: string
             options?: CookieOptions
-          }[]
+          }>
         ) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set({
@@ -48,23 +48,32 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  if (
-    (pathname.startsWith('/dashboard') ||
-      pathname.startsWith('/interview') ||
-      pathname.startsWith('/projects') ||
-      pathname.startsWith('/downloads') ||
-      pathname.startsWith('/subscription') ||
-      pathname.startsWith('/settings')) &&
-    !user
-  ) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  const protectedRoutes = [
+    '/dashboard',
+    '/interview',
+    '/projects',
+    '/downloads',
+    '/subscription',
+    '/settings',
+  ]
+
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  )
+
+  if (isProtectedRoute && !user) {
+    return NextResponse.redirect(
+      new URL('/login', request.url)
+    )
   }
 
   if (
     (pathname === '/login' || pathname === '/register') &&
     user
   ) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(
+      new URL('/dashboard', request.url)
+    )
   }
 
   return response
