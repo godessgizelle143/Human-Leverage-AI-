@@ -17,18 +17,27 @@ export async function GET(request: Request) {
     {
       cookies: {
         getAll() {
-          return request.headers
-            .get('cookie')
-            ?.split('; ')
-            .map((cookie) => {
-              const [name, ...rest] = cookie.split('=')
-              return {
-                name,
-                value: rest.join('='),
-              }
-            }) || []
+          return (
+            request.headers
+              .get('cookie')
+              ?.split('; ')
+              .map((cookie) => {
+                const [name, ...rest] = cookie.split('=')
+                return {
+                  name,
+                  value: rest.join('='),
+                }
+              }) || []
+          )
         },
-        setAll(cookiesToSet) {
+
+        setAll(
+          cookiesToSet: {
+            name: string
+            value: string
+            options?: any
+          }[]
+        ) {
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
           })
