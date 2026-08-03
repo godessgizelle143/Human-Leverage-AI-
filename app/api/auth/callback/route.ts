@@ -39,7 +39,7 @@ export async function GET(request: Request) {
         },
 
 
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
 
           try {
 
