@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const response = NextResponse.redirect(
+  let response = NextResponse.redirect(
     `${origin}/dashboard`
   )
 
@@ -25,22 +25,14 @@ export async function GET(request: NextRequest) {
           return request.cookies.getAll()
         },
 
-        setAll(
-          cookiesToSet: Array<{
-            name: string
-            value: string
-            options?: {
-              path?: string
-              domain?: string
-              maxAge?: number
-              expires?: Date
-              httpOnly?: boolean
-              secure?: boolean
-              sameSite?: 'lax' | 'strict' | 'none'
-            }
-          }>
-        ) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+
             response.cookies.set({
               name,
               value,
