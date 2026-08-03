@@ -35,7 +35,14 @@ export async function GET(request: Request) {
           cookiesToSet: {
             name: string
             value: string
-            options?: any
+            options?: {
+              path?: string
+              maxAge?: number
+              expires?: Date
+              httpOnly?: boolean
+              secure?: boolean
+              sameSite?: 'lax' | 'strict' | 'none'
+            }
           }[]
         ) {
           cookiesToSet.forEach(({ name, value, options }) => {
@@ -49,4 +56,4 @@ export async function GET(request: Request) {
   await supabase.auth.exchangeCodeForSession(code)
 
   return response
-}
+} 
