@@ -17,32 +17,27 @@ export async function GET(request: Request) {
     {
       cookies: {
         getAll() {
-          return (
-            request.headers
-              .get('cookie')
-              ?.split('; ')
-              .map((cookie) => {
-                const [name, ...rest] = cookie.split('=')
-                return {
-                  name,
-                  value: rest.join('='),
-                }
-              }) || []
-          )
+          const cookieHeader = request.headers.get('cookie')
+
+          if (!cookieHeader) {
+            return []
+          }
+
+          return cookieHeader.split('; ').map((cookie) => {
+            const [name, ...rest] = cookie.split('=')
+
+            return {
+              name,
+              value: rest.join('='),
+            }
+          })
         },
 
         setAll(
           cookiesToSet: {
             name: string
             value: string
-            options?: {
-              path?: string
-              maxAge?: number
-              expires?: Date
-              httpOnly?: boolean
-              secure?: boolean
-              sameSite?: 'lax' | 'strict' | 'none'
-            }
+            options?: any
           }[]
         ) {
           cookiesToSet.forEach(({ name, value, options }) => {
@@ -56,4 +51,4 @@ export async function GET(request: Request) {
   await supabase.auth.exchangeCodeForSession(code)
 
   return response
-} 
+}
