@@ -2,11 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  const response = NextResponse.next()
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,30 +13,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
 
-        setAll(
-          cookiesToSet: {
-            name: string
-            value: string
-            options?: {
-              path?: string
-              maxAge?: number
-              expires?: Date
-              httpOnly?: boolean
-              secure?: boolean
-              sameSite?: 'lax' | 'strict' | 'none'
-            }
-          }[]
-        ) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value)
-          })
-
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-
+        setAll(cookiesToSet: any[]) {
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
           })
@@ -53,22 +26,26 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
+  const path = request.nextUrl.pathname
+
+  const protectedRoutes = [
+    '/dashboard',
+    '/interview',
+    '/projects',
+    '/downloads',
+    '/subscription',
+    '/settings',
+  ]
 
   if (
-    (pathname.startsWith('/dashboard') ||
-      pathname.startsWith('/interview') ||
-      pathname.startsWith('/projects') ||
-      pathname.startsWith('/downloads') ||
-      pathname.startsWith('/subscription') ||
-      pathname.startsWith('/settings')) &&
+    protectedRoutes.some((route) => path.startsWith(route)) &&
     !user
   ) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (
-    (pathname === '/login' || pathname === '/register') &&
+    (path === '/login' || path === '/register') &&
     user
   ) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
