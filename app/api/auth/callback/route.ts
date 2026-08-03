@@ -7,6 +7,8 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
 
   if (!code) {
+    console.log('NO AUTH CODE RECEIVED')
+
     return NextResponse.redirect(
       `${origin}/login?error=no_code`
     )
@@ -53,10 +55,14 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
+    console.log('AUTH CALLBACK ERROR:', error.message)
+
     return NextResponse.redirect(
       `${origin}/login?error=${encodeURIComponent(error.message)}`
     )
   }
+
+  console.log('AUTH CALLBACK SUCCESS')
 
   return response
 }
