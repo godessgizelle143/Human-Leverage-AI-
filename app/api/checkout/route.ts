@@ -40,13 +40,6 @@ export async function POST(request: Request) {
       metadata: { user_id: user.id },
     })
     customerId = customer.id
-
-    await supabase.from('subscriptions').upsert({
-      user_id: user.id,
-      stripe_customer_id: customerId,
-      plan: planKey,
-      status: 'trialing',
-    }, { onConflict: 'user_id' })
   }
 
   const session = await stripe.checkout.sessions.create({
