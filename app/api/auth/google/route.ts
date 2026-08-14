@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -16,7 +16,13 @@ export async function GET(request: Request) {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: {
+            name: string
+            value: string
+            options?: CookieOptions
+          }[]
+        ) {
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
           })
@@ -35,7 +41,10 @@ export async function GET(request: Request) {
   if (error || !data.url) {
     console.error('GOOGLE OAUTH ERROR:', error?.message || 'No OAuth URL returned')
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error?.message || 'Google login failed')}`, request.url)
+      new URL(
+        `/login?error=${encodeURIComponent(error?.message || 'Google login failed')}`,
+        request.url
+      )
     )
   }
 
