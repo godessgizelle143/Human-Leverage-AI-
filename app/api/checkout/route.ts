@@ -63,7 +63,7 @@ export async function POST(request: Request) {
         plan: planKey,
       },
     },
-    payment_method_collection: 'if_required',
+    payment_method_collection: 'always',
     allow_promotion_codes: true,
     success_url: `${origin}/dashboard?checkout=success`,
     cancel_url: `${origin}/dashboard?checkout=cancelled`,
