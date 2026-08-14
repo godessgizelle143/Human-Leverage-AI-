@@ -4,7 +4,19 @@ let stripeClient: Stripe | null = null
 
 export function getStripeClient(): Stripe {
   if (!stripeClient) {
-    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    const secretKey = process.env.VERCEL_ENV === 'preview'
+      ? process.env.STRIPE_TEST_SECRET_KEY
+      : process.env.STRIPE_SECRET_KEY
+
+    if (!secretKey) {
+      throw new Error(
+        process.env.VERCEL_ENV === 'preview'
+          ? 'STRIPE_TEST_SECRET_KEY is not configured for the Preview environment'
+          : 'STRIPE_SECRET_KEY is not configured for the Production environment'
+      )
+    }
+
+    stripeClient = new Stripe(secretKey, {
       apiVersion: '2023-10-16',
     })
   }
