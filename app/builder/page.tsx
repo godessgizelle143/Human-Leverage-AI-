@@ -4,9 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { INTERVIEW_QUESTIONS } from '@/types/interview'
 
+type ProjectContent = Record<string, string>
+
 export default function BuilderPage() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [current, setCurrent] = useState(0)
+  const [building, setBuilding] = useState(false)
+  const [error, setError] = useState('')
+  const [project, setProject] = useState<{ title: string; content: ProjectContent } | null>(null)
 
   const question = INTERVIEW_QUESTIONS[current]
   const progress = Math.round(((current + 1) / INTERVIEW_QUESTIONS.length) * 100)
@@ -14,6 +19,56 @@ export default function BuilderPage() {
 
   const saveAnswer = (value: string) => {
     setAnswers((previous) => ({ ...previous, [question.id]: value }))
+    setError('')
+  }
+
+  const buildAssets = async () => {
+    setBuilding(true)
+    setError('')
+    try {
+      const response = await fetch('/api/projects/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Unable to build your assets.')
+      setProject(data.project)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to build your assets.')
+    } finally {
+      setBuilding(false)
+    }
+  }
+
+  if (project) {
+    return (
+      <main className="min-h-screen bg-brand-black text-white px-6 py-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <p className="text-brand-gold text-sm font-semibold mb-2">HUMAN LEVERAGE AI™</p>
+              <h1 className="text-3xl font-bold">{project.title}</h1>
+            </div>
+            <Link href="/dashboard" className="text-white/60 hover:text-white">← Dashboard</Link>
+          </div>
+          <div className="glass rounded-2xl p-8">
+            <div className="mb-8">
+              <p className="text-brand-gold font-semibold">Your assets are ready</p>
+              <h2 className="text-2xl font-semibold mt-2">Your business blueprint</h2>
+            </div>
+            <div className="space-y-7">
+              {Object.entries(project.content).map(([key, value]) => (
+                <section key={key}>
+                  <h3 className="text-lg font-semibold capitalize mb-2">{key.replaceAll('_', ' ')}</h3>
+                  <p className="text-white/80 leading-7 whitespace-pre-wrap">{value}</p>
+                </section>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -48,18 +103,29 @@ export default function BuilderPage() {
             autoFocus
           />
 
+          {error && (
+            <div className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-red-200">
+              {error}
+            </div>
+          )}
+
           <div className="flex justify-between gap-4 mt-6">
             <button
               type="button"
               onClick={() => setCurrent((value) => Math.max(0, value - 1))}
-              disabled={current === 0}
+              disabled={current === 0 || building}
               className="btn-secondary disabled:opacity-40"
             >
               Back
             </button>
             {isLast ? (
-              <button type="button" disabled className="btn-primary opacity-60 cursor-not-allowed">
-                Build My Assets — Coming Next
+              <button
+                type="button"
+                onClick={buildAssets}
+                disabled={building}
+                className="btn-primary disabled:opacity-60"
+              >
+                {building ? 'Building Your Assets…' : 'Build My Assets →'}
               </button>
             ) : (
               <button
