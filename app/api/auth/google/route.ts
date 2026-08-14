@@ -6,7 +6,11 @@ export async function GET(request: Request) {
   const cookieStore = await cookies()
   const origin = new URL(request.url).origin
 
-  const response = NextResponse.redirect(new URL('/login', request.url))
+  const cookiesToSet: {
+    name: string
+    value: string
+    options?: CookieOptions
+  }[] = []
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,16 +20,8 @@ export async function GET(request: Request) {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(
-          cookiesToSet: {
-            name: string
-            value: string
-            options?: CookieOptions
-          }[]
-        ) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options)
-          })
+        setAll(cookies) {
+          cookiesToSet.push(...cookies)
         },
       },
     }
@@ -48,6 +44,12 @@ export async function GET(request: Request) {
     )
   }
 
-  response.headers.set('Location', data.url)
+  const response = NextResponse.redirect(data.url)
+
+  cookiesToSet.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options)
+  })
+
+  response.headers.set('Cache-Control', 'private, no-store')
   return response
 }
