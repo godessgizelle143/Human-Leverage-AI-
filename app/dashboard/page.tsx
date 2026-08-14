@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { PRICING_PLANS, type PlanKey } from '@/lib/stripe/client'
 
@@ -13,6 +14,8 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .maybeSingle()
 
+  const hasAccess = !!subscription && ['active', 'trialing'].includes(subscription.status)
+
   return (
     <main className="min-h-screen bg-brand-black text-white px-6 py-12">
       <div className="max-w-6xl mx-auto">
@@ -24,13 +27,20 @@ export default async function DashboardPage() {
 
         {subscription ? (
           <div className="glass rounded-2xl p-6 mb-10">
-            <h2 className="text-xl font-semibold mb-2">Your current plan</h2>
-            <p className="text-white/70 capitalize">
-              {subscription.plan} · {subscription.status}
-            </p>
-            <p className="text-white/50 text-sm mt-2">
-              Interviews used: {subscription.interviews_used} · Builds used: {subscription.builds_used}
-            </p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <div>
+                <h2 className="text-xl font-semibold mb-2">Your current plan</h2>
+                <p className="text-white/70 capitalize">{subscription.plan} · {subscription.status}</p>
+                <p className="text-white/50 text-sm mt-2">
+                  Interviews used: {subscription.interviews_used} · Builds used: {subscription.builds_used}
+                </p>
+              </div>
+              {hasAccess && (
+                <Link href="/builder" className="btn-primary inline-flex items-center justify-center px-6 py-3">
+                  🚀 Start a New Project
+                </Link>
+              )}
+            </div>
           </div>
         ) : (
           <div className="glass rounded-2xl p-6 mb-10">
@@ -53,7 +63,7 @@ export default async function DashboardPage() {
               </ul>
               <form action="/api/checkout" method="POST">
                 <input type="hidden" name="plan" value={key} />
-                <button type="submit" className={key === 'professional' ? 'btn-primary w-full' : 'btn-secondary w-full'}>
+                <button type="submit" disabled={subscription?.plan === key} className={key === 'professional' ? 'btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed' : 'btn-secondary w-full disabled:opacity-60 disabled:cursor-not-allowed'}>
                   {subscription?.plan === key ? 'Current Plan' : 'Start 3-Day Trial'}
                 </button>
               </form>
