@@ -49,10 +49,30 @@ export default function LoginPage() {
     }
   }
 
-  function handleGoogleLogin() {
+  async function handleGoogleLogin() {
     setGoogleLoading(true)
     setError('')
-    window.location.assign('/api/auth/google')
+
+    try {
+      const supabase = createClient()
+      const redirectTo = `${window.location.origin}/api/auth/callback`
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+        },
+      })
+
+      if (error) {
+        setError(error.message)
+        setGoogleLoading(false)
+      }
+    } catch (err) {
+      console.error('GOOGLE LOGIN ERROR:', err)
+      setError('Unable to start Google sign-in. Please try again.')
+      setGoogleLoading(false)
+    }
   }
 
   return (
