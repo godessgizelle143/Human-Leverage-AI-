@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       if (userId && subscriptionId && customerId && (plan === 'creator' || plan === 'professional' || plan === 'business')) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
-        await supabase.from('subscriptions').upsert({
+        const { error: upsertError } = await supabase.from('subscriptions').upsert({
           user_id: userId,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscription.id,
@@ -54,6 +54,11 @@ export async function POST(request: Request) {
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
+
+        if (upsertError) {
+          console.error('Subscription upsert failed:', upsertError.message)
+          return NextResponse.json({ error: 'Database sync failed' }, { status: 500 })
+        }
       }
     }
 
@@ -70,7 +75,7 @@ export async function POST(request: Request) {
 
       const isNewPeriod = existing?.current_period_start && existing.current_period_start !== newPeriodStart
 
-      await supabase
+      const { error: updateError } = await supabase
         .from('subscriptions')
         .update({
           stripe_subscription_id: subscription.id,
@@ -81,6 +86,11 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_customer_id', customerId)
+
+      if (updateError) {
+        console.error('Subscription update failed:', updateError.message)
+        return NextResponse.json({ error: 'Database sync failed' }, { status: 500 })
+      }
     }
   } catch (error) {
     console.error('Stripe webhook processing error:', error)
