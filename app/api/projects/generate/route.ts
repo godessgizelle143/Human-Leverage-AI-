@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { getOpenAIClient, GENERATION_SYSTEM_PROMPT } from '@/lib/openai/client'
 import { HLAI_CAPABILITIES } from '@/lib/ai/capabilities'
@@ -9,18 +10,28 @@ export const maxDuration = 60
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'AI generation is not configured in this production deployment.' }, { status: 503 })
-    }
+    if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: 'AI generation is not configured in this production deployment.' }, { status: 503 })
 
-    const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) return NextResponse.json({ error: 'Authentication required. Please sign in again.' }, { status: 401 })
+    const authorization = request.headers.get('authorization')
+    let user = null
+    let authError = null
+    if (authorization?.startsWith('Bearer ')) {
+      const token = authorization.slice(7).trim()
+      const client = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { global: { headers: { Authorization: `Bearer ${token}` } } })
+      const result = await client.auth.getUser(token)
+      user = result.data.user
+      authError = result.error
+    } else {
+      const supabase = await createServerSupabaseClient()
+      const result = await supabase.auth.getUser()
+      user = result.data.user
+      authError = result.error
+    }
+    if (authError || !user) return NextResponse.json({ error: 'Authentication required. Please sign in again. Your saved interview answers are still on this device.' }, { status: 401 })
 
     const body = await request.json()
     const answers = body?.answers as Record<string, string> | undefined
     if (!answers || Object.keys(answers).length === 0) return NextResponse.json({ error: 'Interview answers are required.' }, { status: 400 })
-
     const cleanAnswers = Object.fromEntries(Object.entries(answers).map(([key, value]) => [key, String(value).trim()]))
     const title = cleanAnswers['1'] || 'My New Business'
     const interviewId = crypto.randomUUID()
@@ -42,10 +53,7 @@ export async function POST(request: Request) {
       })
     } catch (error) {
       const status = typeof error === 'object' && error !== null && 'status' in error ? Number(error.status) : 0
-      if (status === 429) {
-        console.error('OpenAI generation quota exceeded.')
-        return NextResponse.json({ error: 'AI generation is temporarily unavailable because the AI service has reached its usage limit. Please try again later.' }, { status: 429 })
-      }
+      if (status === 429) return NextResponse.json({ error: 'AI generation is temporarily unavailable because the AI service has reached its usage limit. Please try again later.' }, { status: 429 })
       console.error('OpenAI generation request failed:', error instanceof Error ? error.message : 'Unknown provider error')
       return NextResponse.json({ error: 'AI generation is temporarily unavailable. Please try again later.' }, { status: 502 })
     }
@@ -60,13 +68,11 @@ export async function POST(request: Request) {
     const serviceSupabase = createServiceRoleClient()
     const { error: interviewError } = await serviceSupabase.from('interviews').upsert({ id: interviewId, user_id: user.id, title, status: 'completed', progress: 100, messages: cleanAnswers, created_at: now, updated_at: now })
     if (interviewError) throw new Error(`Could not save interview: ${interviewError.message}`)
-
     const { data: project, error: projectError } = await serviceSupabase.from('projects').insert({ id: projectId, user_id: user.id, interview_id: interviewId, title, content, status: 'completed', created_at: now, updated_at: now }).select().single()
     if (projectError) throw new Error(`Could not save project: ${projectError.message}`)
-
     return NextResponse.json({ success: true, project, capabilities: recommendedModules.map((id) => HLAI_CAPABILITIES.find((capability) => capability.id === id)).filter(Boolean) })
   } catch (error) {
     console.error('Project generation failed:', error instanceof Error ? error.message : 'Unknown server error')
-    return NextResponse.json({ error: 'Project generation failed. Please try again.' }, { status: 500 })
+    return NextResponse.json({ error: 'Project generation failed. Please try again. Your interview draft remains saved on this device.' }, { status: 500 })
   }
 }
