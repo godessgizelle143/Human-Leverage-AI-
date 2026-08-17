@@ -29,15 +29,26 @@ export async function POST(request: Request) {
     const capabilityCatalog = HLAI_CAPABILITIES.map(({ id, name, category, description, stage }) => ({ id, name, category, description, stage }))
 
     const openai = getOpenAIClient()
-    const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-      temperature: 0.7,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: `${GENERATION_SYSTEM_PROMPT}\nReturn valid JSON only with these keys: business_summary, ideal_customer, problem_solved, differentiation, products_services, brand_voice, origin_story, mission_values, customer_transformation, goals_6_12_months, marketing_strategy, launch_roadmap, elevator_pitch, next_steps, recommended_modules. recommended_modules must be an array containing only capability IDs from the supplied catalog.` },
-        { role: 'user', content: `Build a practical starter asset package from this completed Human Leverage AI business interview. Preserve the founder's actual ideas and do not invent testimonials, traction, customers, revenue, partnerships, or accomplishments. Recommend only the HLai capabilities that would materially help this business next.\n\nCAPABILITY CATALOG:\n${JSON.stringify(capabilityCatalog, null, 2)}\n\nINTERVIEW ANSWERS:\n${JSON.stringify(cleanAnswers, null, 2)}` }
-      ]
-    })
+    let completion
+    try {
+      completion = await openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        temperature: 0.7,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: `${GENERATION_SYSTEM_PROMPT}\nReturn valid JSON only with these keys: business_summary, ideal_customer, problem_solved, differentiation, products_services, brand_voice, origin_story, mission_values, customer_transformation, goals_6_12_months, marketing_strategy, launch_roadmap, elevator_pitch, next_steps, recommended_modules. recommended_modules must be an array containing only capability IDs from the supplied catalog.` },
+          { role: 'user', content: `Build a practical starter asset package from this completed Human Leverage AI business interview. Preserve the founder's actual ideas and do not invent testimonials, traction, customers, revenue, partnerships, or accomplishments. Recommend only the HLai capabilities that would materially help this business next.\n\nCAPABILITY CATALOG:\n${JSON.stringify(capabilityCatalog, null, 2)}\n\nINTERVIEW ANSWERS:\n${JSON.stringify(cleanAnswers, null, 2)}` }
+        ]
+      })
+    } catch (error) {
+      const status = typeof error === 'object' && error !== null && 'status' in error ? Number(error.status) : 0
+      if (status === 429) {
+        console.error('OpenAI generation quota exceeded.')
+        return NextResponse.json({ error: 'AI generation is temporarily unavailable because the AI service has reached its usage limit. Please try again later.' }, { status: 429 })
+      }
+      console.error('OpenAI generation request failed:', error instanceof Error ? error.message : 'Unknown provider error')
+      return NextResponse.json({ error: 'AI generation is temporarily unavailable. Please try again later.' }, { status: 502 })
+    }
 
     const raw = completion.choices[0]?.message?.content
     if (!raw) throw new Error('AI returned no content.')
@@ -55,7 +66,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, project, capabilities: recommendedModules.map((id) => HLAI_CAPABILITIES.find((capability) => capability.id === id)).filter(Boolean) })
   } catch (error) {
-    console.error('Project generation failed:', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Project generation failed.' }, { status: 500 })
+    console.error('Project generation failed:', error instanceof Error ? error.message : 'Unknown server error')
+    return NextResponse.json({ error: 'Project generation failed. Please try again.' }, { status: 500 })
   }
 }
