@@ -1,10 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { INTERVIEW_QUESTIONS } from '@/types/interview'
+import { createClient } from '@/lib/supabase/client'
 
 type ProjectContent = Record<string, unknown>
+const DRAFT_KEY = 'human-leverage-builder-draft-v1'
+
+type Draft = { answers: Record<number, string>; current: number }
 
 export default function BuilderPage() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
@@ -12,6 +16,32 @@ export default function BuilderPage() {
   const [building, setBuilding] = useState(false)
   const [error, setError] = useState('')
   const [project, setProject] = useState<{ title: string; content: ProjectContent } | null>(null)
+  const [restored, setRestored] = useState(false)
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY)
+      if (saved) {
+        const draft = JSON.parse(saved) as Draft
+        if (draft?.answers && Object.keys(draft.answers).length) {
+          setAnswers(draft.answers)
+          setCurrent(Math.max(0, Math.min(Number(draft.current) || 0, INTERVIEW_QUESTIONS.length - 1)))
+          setRestored(true)
+        }
+      }
+    } catch {
+      // Ignore malformed local drafts.
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!restored && Object.keys(answers).length === 0 && current === 0) return
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, current }))
+    } catch {
+      // Local persistence is best-effort; the in-memory interview still works.
+    }
+  }, [answers, current, restored])
 
   const question = INTERVIEW_QUESTIONS[current]
   const progress = Math.round(((current + 1) / INTERVIEW_QUESTIONS.length) * 100)
@@ -27,9 +57,23 @@ export default function BuilderPage() {
     setBuilding(true)
     setError('')
     try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        const { data: refreshed } = await supabase.auth.refreshSession()
+        if (!refreshed.session?.access_token) {
+          throw new Error('Your sign-in session expired. Please sign in again. Your interview answers are saved on this device.')
+        }
+        session = refreshed.session
+      }
+
       const response = await fetch('/api/projects/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
         credentials: 'include',
         body: JSON.stringify({ answers }),
       })
@@ -43,9 +87,10 @@ export default function BuilderPage() {
       }
       if (!data.project) throw new Error('The asset builder returned no project.')
       setProject(data.project)
+      localStorage.removeItem(DRAFT_KEY)
     } catch (err) {
       console.error('Build My Assets failed:', err)
-      setError(err instanceof Error ? err.message : 'Unable to build your assets. Please try again.')
+      setError(err instanceof Error ? err.message : 'Unable to build your assets. Please try again. Your answers remain saved on this device.')
     } finally {
       setBuilding(false)
     }
@@ -81,6 +126,7 @@ export default function BuilderPage() {
           <div className="h-2 rounded-full bg-white/10 overflow-hidden mb-10"><div className="h-full bg-brand-gold transition-all" style={{ width: `${progress}%` }} /></div>
           <p className="text-brand-gold text-sm font-semibold uppercase mb-3">{question.category}</p><h2 className="text-2xl font-semibold mb-6">{question.question}</h2>
           <textarea value={answers[question.id] ?? ''} onChange={(event) => saveAnswer(event.target.value)} rows={7} className="w-full rounded-xl bg-white/5 border border-white/10 p-4 text-white placeholder:text-white/30 outline-none focus:border-brand-gold" placeholder="Tell Human Leverage AI in your own words..." autoFocus />
+          {restored && current === 0 && <div className="mt-4 rounded-xl border border-brand-gold/30 bg-brand-gold/10 p-3 text-brand-gold text-sm">Your saved interview progress was restored on this device.</div>}
           {error && <div className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-red-200">{error}</div>}
           <div className="flex justify-between gap-4 mt-6">
             <button type="button" onClick={() => setCurrent((value) => Math.max(0, value - 1))} disabled={current === 0 || building} className="btn-secondary disabled:opacity-40">Back</button>
