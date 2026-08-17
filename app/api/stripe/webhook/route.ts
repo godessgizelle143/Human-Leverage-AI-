@@ -60,14 +60,24 @@ export async function POST(request: Request) {
     if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
       const subscription = event.data.object as Stripe.Subscription
       const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id
+      const newPeriodStart = new Date(subscription.current_period_start * 1000).toISOString()
+
+      const { data: existing } = await supabase
+        .from('subscriptions')
+        .select('current_period_start')
+        .eq('stripe_customer_id', customerId)
+        .single()
+
+      const isNewPeriod = existing?.current_period_start && existing.current_period_start !== newPeriodStart
 
       await supabase
         .from('subscriptions')
         .update({
           stripe_subscription_id: subscription.id,
           status: event.type === 'customer.subscription.deleted' ? 'cancelled' : mapStatus(subscription.status),
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+          current_period_start: newPeriodStart,
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          ...(isNewPeriod ? { interviews_used: 0, builds_used: 0 } : {}),
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_customer_id', customerId)
