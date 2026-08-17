@@ -57,12 +57,19 @@ export default function BuilderPage() {
     setError('')
     try {
       const supabase = createClient()
-      let { data: { session } } = await supabase.auth.getSession()
+      const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession()
+      let session = refreshed.session
+
       if (!session?.access_token) {
-        const { data: refreshed } = await supabase.auth.refreshSession()
-        session = refreshed.session
+        const { data: current } = await supabase.auth.getSession()
+        session = current.session
       }
+
       if (!session?.access_token) {
+        console.error('Build My Assets: no usable session.', {
+          refreshErrorMessage: refreshError?.message ?? null,
+          refreshErrorStatus: refreshError?.status ?? null,
+        })
         throw new Error('Your sign-in session expired. Please sign in again. Your interview answers are saved on this device.')
       }
 
