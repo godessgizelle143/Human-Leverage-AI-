@@ -14,6 +14,12 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .maybeSingle()
 
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, title, status, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
   // A new authenticated user gets one application-level 3-day trial without Stripe.
   if (!subscription) {
     const started = new Date()
@@ -66,6 +72,26 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="glass rounded-2xl p-6 mb-10"><h2 className="text-xl font-semibold mb-2">Choose your plan</h2><p className="text-white/60">Start your 3-day free trial with no credit card required.</p></div>
+        )}
+
+        {projects && projects.length > 0 && (
+          <section className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-brand-gold text-sm font-semibold">YOUR WORK</p>
+                <h2 className="text-2xl font-bold">Saved Projects</h2>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {projects.map((project) => (
+                <Link key={project.id} href={`/projects/${project.id}`} className="glass rounded-2xl p-5 hover:border-brand-gold/40 transition-colors">
+                  <h3 className="text-lg font-semibold">{project.title}</h3>
+                  <p className="text-white/50 text-sm mt-2 capitalize">{project.status} · {new Date(project.created_at).toLocaleDateString()}</p>
+                  <p className="text-brand-gold text-sm mt-4">Open project →</p>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         <div className="grid md:grid-cols-3 gap-6">
