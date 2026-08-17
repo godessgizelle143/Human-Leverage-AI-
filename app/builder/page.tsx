@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { INTERVIEW_QUESTIONS } from '@/types/interview'
 import { createClient } from '@/lib/supabase/client'
@@ -10,11 +11,12 @@ const DRAFT_KEY = 'human-leverage-builder-draft-v1'
 type Draft = { answers: Record<number, string>; current: number }
 
 export default function BuilderPage() {
+  const router = useRouter()
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [current, setCurrent] = useState(0)
   const [building, setBuilding] = useState(false)
   const [error, setError] = useState('')
-  const [project, setProject] = useState<{ title: string; content: ProjectContent } | null>(null)
+  const [project, setProject] = useState<{ id?: string; title: string; content: ProjectContent } | null>(null)
   const [restored, setRestored] = useState(false)
 
   useEffect(() => {
@@ -85,12 +87,13 @@ export default function BuilderPage() {
       })
 
       const raw = await response.text()
-      let data: { project?: { title: string; content: ProjectContent }; error?: string } = {}
+      let data: { project?: { id: string; title: string; content: ProjectContent }; error?: string } = {}
       try { data = JSON.parse(raw) } catch { /* handled below */ }
       if (!response.ok) throw new Error(data.error || `Asset builder returned HTTP ${response.status}.`)
       if (!data.project) throw new Error('The asset builder returned no project.')
       setProject(data.project)
       localStorage.removeItem(DRAFT_KEY)
+      router.push(`/projects/${data.project.id}`)
     } catch (err) {
       console.error('Build My Assets failed:', err)
       setError(err instanceof Error ? err.message : 'Unable to build your assets. Your answers remain saved on this device.')
