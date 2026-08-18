@@ -1,4 +1,4 @@
-  import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -48,10 +48,14 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  if (
-    pathname.startsWith('/dashboard') &&
-    !user
-  ) {
+  // Keep authenticated users out of the public landing/login/register pages.
+  // This also fixes the case where an OAuth session is valid but navigation
+  // falls back to the site root instead of the dashboard.
+  if (user && (pathname === '/' || pathname === '/login' || pathname === '/register')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  if (pathname.startsWith('/dashboard') && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -60,6 +64,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/dashboard/:path*',
     '/login',
     '/register',
