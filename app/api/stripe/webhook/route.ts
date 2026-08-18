@@ -12,12 +12,19 @@ function mapStatus(
   return 'cancelled'
 }
 
+type SubscriptionPeriodItem = Stripe.SubscriptionItem & {
+  current_period_start?: number
+  current_period_end?: number
+}
+
 function getSubscriptionPeriod(
   subscription: Stripe.Subscription
 ): { start: string; end: string } | null {
-  const item = subscription.items.data[0]
+  const item = subscription.items.data[0] as SubscriptionPeriodItem | undefined
 
-  if (!item) return null
+  if (!item || item.current_period_start == null || item.current_period_end == null) {
+    return null
+  }
 
   return {
     start: new Date(item.current_period_start * 1000).toISOString(),
