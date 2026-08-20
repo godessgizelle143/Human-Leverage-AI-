@@ -15,14 +15,17 @@ const config: Config = {
           pink: '#FF00A8',
           white: '#ffffff',
         },
+        brass: '#a47b32',
+        paper: '#f4efe4',
+        ink: '#171512',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-brand': 'linear-gradient(135deg, #FFD700 0%, #FF00A8 100%)',
       },
       animation: {
-        'glow': 'glow 2s ease-in-out infinite alternate',
-        'float': 'float 6s ease-in-out infinite',
+        glow: 'glow 2s ease-in-out infinite alternate',
+        float: 'float 6s ease-in-out infinite',
       },
       keyframes: {
         glow: {
@@ -38,4 +41,5 @@ const config: Config = {
   },
   plugins: [],
 }
+
 export default config
