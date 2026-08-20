@@ -3,6 +3,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { getOpenAIClient, GENERATION_SYSTEM_PROMPT } from '@/lib/openai/client'
 import { HLAI_CAPABILITIES } from '@/lib/ai/capabilities'
+import { isHumanLeverageOwner } from '@/lib/owner-access'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -35,9 +36,10 @@ export async function POST(request: Request) {
     const cleanAnswers = Object.fromEntries(Object.entries(answers).map(([key, value]) => [key, String(value).trim()]))
 
     const serviceSupabase = createServiceRoleClient()
-    const { data: gate, error: gateError } = await serviceSupabase
-      .rpc('try_consume_build', { p_user_id: user.id })
-      .single()
+    const isOwner = isHumanLeverageOwner(user.email)
+    const { data: gate, error: gateError } = isOwner
+      ? { data: { allowed: true, plan: 'owner' }, error: null }
+      : await serviceSupabase.rpc('try_consume_build', { p_user_id: user.id }).single()
 
     if (gateError) {
       console.error('Entitlement check failed:', gateError.message)
@@ -51,7 +53,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: message }, { status: 403 })
     }
 
-    let buildReserved = true
+    let buildReserved = !isOwner
 
     try {
       const title = cleanAnswers['1'] || 'My New Business'
