@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { PRICING_PLANS, type PlanKey } from '@/lib/stripe/client'
+import { isHumanLeverageOwner } from '@/lib/owner-access'
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return null
+
+  const isOwner = isHumanLeverageOwner(user.email)
 
   let { data: subscription } = await supabase
     .from('subscriptions')
@@ -44,7 +47,7 @@ export default async function DashboardPage() {
   }
 
   const trialEnded = !!subscription?.current_period_end && new Date(subscription.current_period_end) <= new Date()
-  const hasAccess = !!subscription && ['active', 'trialing'].includes(subscription.status) && !trialEnded
+  const hasAccess = isOwner || (!!subscription && ['active', 'trialing'].includes(subscription.status) && !trialEnded)
 
   return (
     <main className="min-h-screen bg-brand-black text-white px-6 py-12">
@@ -60,7 +63,7 @@ export default async function DashboardPage() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
               <div>
                 <h2 className="text-xl font-semibold mb-2">Your current plan</h2>
-                <p className="text-white/70 capitalize">{trialEnded ? 'free trial ended' : `${subscription.plan} · ${subscription.status}`}</p>
+                <p className="text-white/70 capitalize">{isOwner ? 'Owner · test access' : trialEnded ? 'free trial ended' : `${subscription.plan} · ${subscription.status}`}</p>
                 <p className="text-white/50 text-sm mt-2">Interviews used: {subscription.interviews_used} · Builds used: {subscription.builds_used}</p>
               </div>
               {hasAccess ? (
@@ -101,7 +104,7 @@ export default async function DashboardPage() {
               <h2 className="text-2xl font-bold">{plan.name}</h2>
               <div className="my-5"><span className="text-4xl font-bold gradient-text">${plan.price / 100}</span><span className="text-white/40">/month</span></div>
               <ul className="space-y-2 mb-7 text-sm text-white/70">{plan.features.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul>
-              <form action="/api/checkout" method="POST"><input type="hidden" name="plan" value={key} /><button type="submit" disabled={subscription?.plan === key && !trialEnded} className={key === 'professional' ? 'btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed' : 'btn-secondary w-full disabled:opacity-60 disabled:cursor-not-allowed'}>{subscription?.plan === key && !trialEnded ? 'Current Plan' : 'Choose Plan'}</button></form>
+              <form action="/api/checkout" method="POST"><input type="hidden" name="plan" value={key} /><button type="submit" disabled={isOwner || (subscription?.plan === key && !trialEnded)} className={key === 'professional' ? 'btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed' : 'btn-secondary w-full disabled:opacity-60 disabled:cursor-not-allowed'}>{isOwner ? 'Owner Test Access' : subscription?.plan === key && !trialEnded ? 'Current Plan' : 'Choose Plan'}</button></form>
             </div>
           ))}
         </div>
