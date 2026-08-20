@@ -28,8 +28,24 @@ export async function POST(request: Request) {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (existingSubscription?.stripe_subscription_id && ['active', 'trialing'].includes(existingSubscription.status)) {
-    return NextResponse.redirect(new URL('/dashboard?error=already-subscribed', request.url), 303)
+  // Never create a second subscription for an account that already has
+  // an active, trialing, past-due, or otherwise existing Stripe subscription.
+  // A past-due subscription must be recovered in Stripe rather than creating
+  // a duplicate recurring charge.
+  if (existingSubscription?.stripe_subscription_id) {
+    const status = existingSubscription.status
+
+    if (['active', 'trialing'].includes(status)) {
+      return NextResponse.redirect(new URL('/dashboard?error=already-subscribed', request.url), 303)
+    }
+
+    if (status === 'past_due') {
+      return NextResponse.redirect(new URL('/dashboard?error=payment-required', request.url), 303)
+    }
+
+    if (['incomplete', 'incomplete_expired', 'unpaid'].includes(status)) {
+      return NextResponse.redirect(new URL('/dashboard?error=subscription-needs-attention', request.url), 303)
+    }
   }
 
   let customerId = existingSubscription?.stripe_customer_id ?? undefined
