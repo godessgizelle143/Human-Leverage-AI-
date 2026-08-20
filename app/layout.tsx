@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Fraunces, Inter } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
@@ -7,29 +7,30 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ['latin'],
-  variable: '--font-playfair',
+  variable: '--font-fraunces',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
   title: 'Human Leverage AI™ — Speak Once. Build Forever.',
-  description: 'Transform a single conversation into a complete digital business. AI-powered interviews that generate websites, content, and marketing materials automatically.',
-  keywords: ['AI', 'business automation', 'content generation', 'SaaS', 'digital business'],
+  description: 'Transform your knowledge into digital products, marketing assets, and business resources with Human Leverage AI™.',
+  keywords: ['AI', 'business automation', 'content generation', 'digital products', 'Human Leverage AI'],
   openGraph: {
     title: 'Human Leverage AI™ — Speak Once. Build Forever.',
-    description: 'Transform a single conversation into a complete digital business.',
+    description: 'Turn what you know into assets you can use, share, and sell.',
     type: 'website',
   },
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body className={inter.className}>{children}</body>
     </html>
   )
