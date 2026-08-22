@@ -31,11 +31,7 @@ export async function middleware(request: NextRequest) {
               ...options,
             })
 
-            response.cookies.set({
-              name,
-              value,
-              ...options,
-            })
+            response.cookies.set(name, value, options)
           })
         },
       },
@@ -48,10 +44,15 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  // Keep authenticated users out of the public landing/login/register pages.
-  // This also fixes the case where an OAuth session is valid but navigation
-  // falls back to the site root instead of the dashboard.
-  if (user && (pathname === '/' || pathname === '/login' || pathname === '/register')) {
+  // The root route is always the public marketing landing page.
+  // Do not redirect authenticated users away from `/` so the public entry
+  // point remains testable and shareable.
+  if (pathname === '/') {
+    return response
+  }
+
+  // Keep authenticated users out of the public login/register pages.
+  if (user && (pathname === '/login' || pathname === '/register')) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
