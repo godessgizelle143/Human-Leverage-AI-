@@ -23,27 +23,18 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  // A new authenticated user gets one application-level 3-day trial without Stripe.
+  // New authenticated users receive the cardless trial through the database RPC.
+  // This keeps trial creation behind auth.uid() and avoids a direct subscriptions INSERT.
   if (!subscription) {
-    const started = new Date()
-    const ends = new Date(started.getTime() + 3 * 24 * 60 * 60 * 1000)
-    const { data: created } = await supabase
-      .from('subscriptions')
-      .insert({
-        user_id: user.id,
-        plan: 'professional',
-        status: 'trialing',
-        interviews_used: 0,
-        builds_used: 0,
-        current_period_start: started.toISOString(),
-        current_period_end: ends.toISOString(),
-        trial_started_at: started.toISOString(),
-        stripe_customer_id: null,
-        stripe_subscription_id: null,
-      })
-      .select('plan, status, interviews_used, builds_used, current_period_end')
-      .single()
-    subscription = created
+    const { error: trialError } = await supabase.rpc('start_trial')
+    if (!trialError) {
+      const { data: created } = await supabase
+        .from('subscriptions')
+        .select('plan, status, interviews_used, builds_used, current_period_end')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      subscription = created
+    }
   }
 
   const trialEnded = !!subscription?.current_period_end && new Date(subscription.current_period_end) <= new Date()
