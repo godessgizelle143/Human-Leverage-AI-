@@ -33,12 +33,20 @@ export async function GET(request: Request) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // New users receive a cardless 3-day application trial. Existing Stripe
-  // subscriptions are preserved and never overwritten here.
-  if (user) {
-    const { error: trialError } = await supabase.rpc('start_trial')
+  if (!user) {
+    return NextResponse.redirect(new URL('/login?error=missing-user', request.url))
+  }
 
-    if (trialError) console.error('CARDLESS TRIAL CREATION ERROR:', trialError.message)
+  // Every authenticated signup/login may safely call this idempotent RPC.
+  // The database derives ownership from auth.uid() and preserves existing
+  // subscriptions via ON CONFLICT DO NOTHING.
+  const { error: trialError } = await supabase.rpc('start_trial')
+
+  if (trialError) {
+    console.error('CARDLESS TRIAL CREATION ERROR:', trialError.message)
+    return NextResponse.redirect(
+      new URL('/login?error=trial-creation-failed', request.url)
+    )
   }
 
   return redirectResponse
