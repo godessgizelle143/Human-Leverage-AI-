@@ -21,8 +21,8 @@ export interface PlanLimits {
 
 export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
   creator: { interviews: 5, builds: 5 },
-  professional: { interviews: 25, builds: 25 },
-  business: { interviews: -1, builds: -1 },
+  professional: { interviews: 15, builds: 15 },
+  business: { interviews: 25, builds: 25 },
 }
 
 export interface PricingPlan {
@@ -47,7 +47,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     type: 'professional',
     price: 97,
     priceDisplay: '$97',
-    features: ['25 AI interviews/month', '25 content builds/month', 'Priority PDF exports', 'Priority support', 'Advanced templates'],
+    features: ['15 AI interviews/month', '15 content builds/month', 'Priority PDF exports', 'Priority support', 'Advanced templates'],
     isPopular: true,
   },
   {
@@ -55,6 +55,6 @@ export const PRICING_PLANS: PricingPlan[] = [
     type: 'business',
     price: 197,
     priceDisplay: '$197',
-    features: ['Unlimited interviews', 'Unlimited builds', 'Premium templates', 'Dedicated support', 'API access', 'White-label options'],
+    features: ['25 AI interviews/month', '25 content builds/month', 'Premium templates', 'Dedicated support', 'API access', 'White-label options'],
   },
 ]

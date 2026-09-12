@@ -8,8 +8,8 @@ const outputs = ['Ebook','Workbook','Course Outline','Sales Page','Landing Page'
 
 const plans = [
   { name: 'Creator', price: '$47', features: ['5 AI interviews/month','5 content builds/month','PDF exports','Email support'] },
-  { name: 'Professional', price: '$97', popular: true, features: ['25 AI interviews/month','25 content builds/month','Priority PDF exports','Priority support','Advanced templates'] },
-  { name: 'Business Pro', price: '$197', features: ['Unlimited interviews','Unlimited builds','Premium templates','Dedicated support','API access','White-label options'] },
+  { name: 'Professional', price: '$97', popular: true, features: ['15 AI interviews/month','15 content builds/month','Priority PDF exports','Priority support','Advanced templates'] },
+  { name: 'Business Pro', price: '$197', features: ['25 AI interviews/month','25 content builds/month','Premium templates','Dedicated support','API access','White-label options'] },
 ]
 
 export default function LandingPage() {
@@ -80,7 +80,7 @@ export default function LandingPage() {
 
       <section id="outputs" className="px-5 py-20 sm:px-8 lg:py-28">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-brand-pink">What You'll Generate</p><h2 className="mt-3 text-4xl font-black sm:text-5xl">One voice. <span className="gradient-text">16 outputs.</span></h2></div><p className="max-w-md text-white/50">Your expertise becomes a reusable library of products, marketing assets, and business resources.</p></div>
+          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-brand-pink">What You&apos;ll Generate</p><h2 className="mt-3 text-4xl font-black sm:text-5xl">One voice. <span className="gradient-text">16 outputs.</span></h2></div><p className="max-w-md text-white/50">Your expertise becomes a reusable library of products, marketing assets, and business resources.</p></div>
           <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{outputs.map((output,i) => <div key={output} className="glass glass-hover rounded-xl p-4"><div className="flex items-center gap-3"><span className="text-xs font-bold text-brand-gold">{String(i+1).padStart(2,'0')}</span><span className="text-sm font-semibold">{output}</span></div></div>)}</div>
         </div>
       </section>

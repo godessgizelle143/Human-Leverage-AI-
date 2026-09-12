@@ -34,16 +34,16 @@ export const PRICING_PLANS = {
   professional: {
     name: 'Professional',
     price: 9700,
-    interviews: 25,
-    builds: 25,
-    features: ['25 AI interviews/month', '25 content builds/month', 'Priority PDF exports', 'Priority support', 'Advanced templates'],
+    interviews: 15,
+    builds: 15,
+    features: ['15 AI interviews/month', '15 content builds/month', 'Priority PDF exports', 'Priority support', 'Advanced templates'],
   },
   business: {
     name: 'Business Pro',
     price: 19700,
-    interviews: -1,
-    builds: -1,
-    features: ['Unlimited interviews', 'Unlimited builds', 'Premium templates', 'Dedicated support', 'API access', 'White-label options'],
+    interviews: 25,
+    builds: 25,
+    features: ['25 AI interviews/month', '25 content builds/month', 'Premium templates', 'Dedicated support', 'API access', 'White-label options'],
   },
 } as const
 
