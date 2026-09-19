@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const isOwner = isHumanLeverageOwner(user.email)
     const { data: gate, error: gateError } = isOwner
       ? { data: { allowed: true, plan: 'owner' }, error: null }
-      : await serviceSupabase.rpc('try_consume_build', { p_user_id: user.id }).single()
+      : await serviceSupabase.rpc('try_consume_generation', { p_user_id: user.id }).single()
 
     if (gateError) {
       console.error('Entitlement check failed:', gateError.message)
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, project, capabilities: recommendedModules.map((id) => HLAI_CAPABILITIES.find((capability) => capability.id === id)).filter(Boolean) })
     } catch (error) {
       if (buildReserved) {
-        await serviceSupabase.rpc('release_build', { p_user_id: user.id })
+        await serviceSupabase.rpc('release_generation', { p_user_id: user.id })
         buildReserved = false
       }
 
