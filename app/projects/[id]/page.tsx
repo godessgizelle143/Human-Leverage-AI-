@@ -96,6 +96,59 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
               ))}
             </div>
           </section>
+          <div className="mb-10 rounded-2xl border border-brand-gold/30 bg-white/5 p-6">
+            <p className="text-brand-gold font-semibold">What happens next</p>
+            <h3 className="text-xl font-semibold mt-2">Turn your blueprint into action</h3>
+            <p className="text-white/70 mt-2 leading-7">
+              Choose the next step you want to build from this blueprint.
+            </p>
+
+            <div className="grid gap-4 md:grid-cols-2 mt-6">
+              <Link
+                href={`/projects/${params.id}/launch-target`}
+                className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
+              >
+                <span className="text-brand-gold font-semibold">01</span>
+                <h4 className="text-lg font-semibold mt-2">Define your launch target</h4>
+                <p className="text-white/60 text-sm mt-1">
+                  Clarify your audience, service area, offer, and first milestone.
+                </p>
+              </Link>
+
+              <Link
+                href="/dashboard"
+                className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
+              >
+                <span className="text-brand-gold font-semibold">02</span>
+                <h4 className="text-lg font-semibold mt-2">Build your customer offer</h4>
+                <p className="text-white/60 text-sm mt-1">
+                  Turn the idea into a clear service, pricing structure, and customer action.
+                </p>
+              </Link>
+
+              <Link
+                href="/dashboard"
+                className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
+              >
+                <span className="text-brand-gold font-semibold">03</span>
+                <h4 className="text-lg font-semibold mt-2">Build your customer foundation</h4>
+                <p className="text-white/60 text-sm mt-1">
+                  Create the website, booking flow, or application customers will use.
+                </p>
+              </Link>
+
+              <Link
+                href="/dashboard"
+                className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
+              >
+                <span className="text-brand-gold font-semibold">04</span>
+                <h4 className="text-lg font-semibold mt-2">Create your launch content</h4>
+                <p className="text-white/60 text-sm mt-1">
+                  Build a practical 30/60/90-day plan from your positioning.
+                </p>
+              </Link>
+            </div>
+          </div>
 
           <div className="space-y-7">
             {Object.entries(content).map(([key, value]) => (
