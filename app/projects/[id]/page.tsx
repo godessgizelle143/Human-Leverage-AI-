@@ -96,6 +96,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
               ))}
             </div>
           </section>
+
           <div className="mb-10 rounded-2xl border border-brand-gold/30 bg-white/5 p-6">
             <p className="text-brand-gold font-semibold">What happens next</p>
             <h3 className="text-xl font-semibold mt-2">Turn your blueprint into action</h3>
@@ -116,7 +117,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
               </Link>
 
               <Link
-                href="/dashboard"
+                href={`/projects/${params.id}/customer-offer`}
                 className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
               >
                 <span className="text-brand-gold font-semibold">02</span>
