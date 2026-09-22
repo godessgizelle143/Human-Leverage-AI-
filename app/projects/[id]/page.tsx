@@ -139,8 +139,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
               </Link>
 
               <Link
-                href="/dashboard"
-                className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
+                href={`/projects/${params.id}/launch-content`}
+                className="rounded-xl border border-brand-gold/30 bg-brand-gold/5 p-5 hover:bg-brand-gold/10 transition"
               >
                 <span className="text-brand-gold font-semibold">04</span>
                 <h4 className="text-lg font-semibold mt-2">Create your launch content</h4>
