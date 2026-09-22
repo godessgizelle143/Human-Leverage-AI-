@@ -1,6 +1,43 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
+export async function GET(
+  _request: Request,
+  { params }: { params: { id: string } }
+) {
+  const supabase = await createServerSupabaseClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data: project, error: projectError } = await supabase
+    .from('projects')
+    .select('content')
+    .eq('id', params.id)
+    .eq('user_id', user.id)
+    .single()
+
+  if (projectError || !project) {
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+  }
+
+  const content =
+    project.content && typeof project.content === 'object'
+      ? project.content
+      : {}
+
+  return NextResponse.json({
+    launchContent:
+      content.launch_content && typeof content.launch_content === 'object'
+        ? content.launch_content
+        : null,
+  })
+}
+
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
