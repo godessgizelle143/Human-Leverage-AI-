@@ -45,8 +45,6 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // The root route is always the public marketing landing page.
-  // Do not redirect authenticated users away from `/` so the public entry
-  // point remains testable and shareable.
   if (pathname === '/') {
     return response
   }
@@ -56,8 +54,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
+  // Only protect the dashboard when there is no authenticated session.
+  // If the request already carries a Supabase auth cookie, preserve the
+  // response/session cookies instead of immediately bouncing the user back
+  // to login during first-request session propagation.
   if (pathname.startsWith('/dashboard') && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    const hasSupabaseAuthCookie = request.cookies
+      .getAll()
+      .some(({ name }) => name.startsWith('sb-') && name.includes('-auth-token'))
+
+    if (!hasSupabaseAuthCookie) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
   return response
