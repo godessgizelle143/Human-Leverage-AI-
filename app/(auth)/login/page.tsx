@@ -54,20 +54,9 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const supabase = createClient()
-      const redirectTo = `${window.location.origin}/api/auth/callback`
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-        },
-      })
-
-      if (error) {
-        setError(error.message)
-        setGoogleLoading(false)
-      }
+      // Route Google OAuth through our server so the callback origin
+      // is always the actual HLAI domain being visited—not localhost.
+      window.location.href = '/api/auth/google'
     } catch (err) {
       console.error('GOOGLE LOGIN ERROR:', err)
       setError('Unable to start Google sign-in. Please try again.')
