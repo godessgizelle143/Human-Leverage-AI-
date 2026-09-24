@@ -6,7 +6,9 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
-  if (!code) return NextResponse.redirect(new URL('/login?error=no-code', request.url))
+  if (!code) {
+    return NextResponse.redirect(new URL('/login?error=no-code', request.url))
+  }
 
   const cookieStore = await cookies()
   const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url))
@@ -16,9 +18,19 @@ export async function GET(request: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
-          cookiesToSet.forEach(({ name, value, options }) => redirectResponse.cookies.set(name, value, options))
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(
+          cookiesToSet: {
+            name: string
+            value: string
+            options?: CookieOptions
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            redirectResponse.cookies.set(name, value, options)
+          })
         },
       },
     }
@@ -28,26 +40,31 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error('CALLBACK ERROR:', error.message)
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url))
-  }
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.redirect(new URL('/login?error=missing-user', request.url))
-  }
-
-  // Every authenticated signup/login may safely call this idempotent RPC.
-  // The database derives ownership from auth.uid() and preserves existing
-  // subscriptions via ON CONFLICT DO NOTHING.
-  const { error: trialError } = await supabase.rpc('start_trial')
-
-  if (trialError) {
-    console.error('CARDLESS TRIAL CREATION ERROR:', trialError.message)
     return NextResponse.redirect(
-      new URL('/login?error=trial-creation-failed', request.url)
+      new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url)
     )
   }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.redirect(
+      new URL('/login?error=missing-user', request.url)
+    )
+  }
+
+  // Authentication is complete at this point.
+  // Trial provisioning is intentionally handled by the dashboard so a
+  // billing/trial database issue can never force a successful login back
+  // to the login page.
+  //
+  // This keeps the OAuth callback responsible only for:
+  // 1. exchanging the PKCE code
+  // 2. persisting the Supabase session cookies
+  // 3. redirecting the authenticated user
+  redirectResponse.headers.set('Cache-Control', 'private, no-store')
 
   return redirectResponse
 }
