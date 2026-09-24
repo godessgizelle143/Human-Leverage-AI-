@@ -1,26 +1,24 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const workspaceItems = [
   { href: '/dashboard', label: 'Dashboard', icon: '🏠' },
   { href: '/builder', label: 'New Project', icon: '🚀' },
-  { href: '/interview', label: 'AI Interviews', icon: '🎤' },
-  { href: '/projects', label: 'My Projects', icon: '📁' },
-  { href: '/downloads', label: 'Downloads', icon: '📥' },
+  { href: '/builder', label: 'AI Interview & Build', icon: '🎤' },
+  { href: '/dashboard#projects', label: 'My Projects', icon: '📁' },
 ]
 
 const accountItems = [
-  { href: '/subscription', label: 'Subscription', icon: '💳' },
-  { href: '/settings', label: 'Settings', icon: '⚙️' },
+  { href: '/dashboard#plans', label: 'Plans & Billing', icon: '💳' },
+  { href: '/dashboard#settings', label: 'Settings', icon: '⚙️' },
 ]
 
 export default function DashboardSidebar({ email }: { email?: string | null }) {
   const pathname = usePathname()
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
 
