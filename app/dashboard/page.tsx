@@ -70,7 +70,7 @@ export default async function DashboardPage() {
           )}
 
           {projects && projects.length > 0 && (
-            <section className="mb-10">
+            <section id="projects" className="mb-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-brand-gold text-sm font-semibold">YOUR WORK</p>
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
             </section>
           )}
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div id="plans" className="grid md:grid-cols-3 gap-6">
             {(Object.entries(PRICING_PLANS) as [PlanKey, typeof PRICING_PLANS[PlanKey]][]).map(([key, plan]) => (
               <div key={key} className={`rounded-2xl p-6 ${key === 'professional' ? 'bg-gradient-to-b from-brand-gold/10 to-brand-pink/10 border border-brand-gold/30' : 'glass'}`}>
                 {key === 'professional' && <div className="text-brand-gold text-sm font-semibold mb-2">Most Popular</div>}
