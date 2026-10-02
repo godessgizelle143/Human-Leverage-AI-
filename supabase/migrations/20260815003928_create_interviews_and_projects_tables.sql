@@ -28,12 +28,26 @@ create index if not exists projects_interview_id_idx on public.projects(intervie
 alter table public.interviews enable row level security;
 alter table public.projects enable row level security;
 
+drop policy if exists "Users can view own interviews" on public.interviews;
 create policy "Users can view own interviews" on public.interviews for select using (auth.uid() = user_id);
+
+drop policy if exists "Users can create own interviews" on public.interviews;
 create policy "Users can create own interviews" on public.interviews for insert with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own interviews" on public.interviews;
 create policy "Users can update own interviews" on public.interviews for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Users can delete own interviews" on public.interviews;
 create policy "Users can delete own interviews" on public.interviews for delete using (auth.uid() = user_id);
 
+drop policy if exists "Users can view own projects" on public.projects;
 create policy "Users can view own projects" on public.projects for select using (auth.uid() = user_id);
+
+drop policy if exists "Users can create own projects" on public.projects;
 create policy "Users can create own projects" on public.projects for insert with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own projects" on public.projects;
 create policy "Users can update own projects" on public.projects for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Users can delete own projects" on public.projects;
 create policy "Users can delete own projects" on public.projects for delete using (auth.uid() = user_id);
