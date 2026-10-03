@@ -14,10 +14,35 @@ export type HKEAsset = {
   updated_at: string
 }
 
+/** Blueprint keys written to projects.content by /api/projects/generate, with display and prompt labels. */
+export const HKE_BLUEPRINT_FIELDS = {
+  business_summary: 'Business summary',
+  ideal_customer: 'Ideal customer',
+  problem_solved: 'Problem solved',
+  customer_transformation: 'Customer needs and transformation',
+  differentiation: 'Differentiation',
+  products_services: 'Products and services',
+  brand_voice: 'Brand voice',
+  origin_story: 'Origin story',
+  mission_values: 'Mission and values',
+  goals_6_12_months: 'Goals for the next 6-12 months',
+  marketing_strategy: 'Marketing strategy',
+  launch_roadmap: 'Launch roadmap',
+  elevator_pitch: 'Elevator pitch',
+  next_steps: 'Next steps',
+} as const
+
+export type HKEBlueprintField = keyof typeof HKE_BLUEPRINT_FIELDS
+
+/** projects.content keys that hold bookkeeping rather than user knowledge. */
+export const HKE_INTERNAL_CONTENT_KEYS = ['recommended_modules', 'capability_catalog_version'] as const
+
 type HKEAssetDefinition = {
   label: string
-  /** Blueprint keys from projects.content that this asset draws on, with prompt labels. */
-  blueprintFields: Record<string, string>
+  /** One line shown next to the build button. */
+  description: string
+  /** Blueprint keys from projects.content that this asset draws on. */
+  blueprintFields: HKEBlueprintField[]
   /** Saved Step 01-04 sections from projects.content that this asset draws on. */
   stepSections: (keyof typeof HKE_STEP_SECTIONS)[]
   instructions: string
@@ -51,21 +76,22 @@ export const HKE_STEP_SECTIONS = {
 export const HKE_ASSET_TYPES = {
   sales_page: {
     label: 'Sales Page',
-    blueprintFields: {
-      business_summary: 'Business summary',
-      ideal_customer: 'Ideal customer',
-      problem_solved: 'Problem solved',
-      customer_transformation: 'Customer needs and transformation',
-      differentiation: 'Differentiation',
-      products_services: 'Products and services',
-      brand_voice: 'Brand voice',
-      origin_story: 'Origin story',
-      mission_values: 'Mission and values',
-      marketing_strategy: 'Marketing strategy',
-      launch_roadmap: 'Launch roadmap',
-      elevator_pitch: 'Elevator pitch',
-      next_steps: 'Next steps',
-    },
+    description: 'A complete sales page for your offer, written from your blueprint and saved steps.',
+    blueprintFields: [
+      'business_summary',
+      'ideal_customer',
+      'problem_solved',
+      'customer_transformation',
+      'differentiation',
+      'products_services',
+      'brand_voice',
+      'origin_story',
+      'mission_values',
+      'marketing_strategy',
+      'launch_roadmap',
+      'elevator_pitch',
+      'next_steps',
+    ],
     stepSections: ['launch_target', 'customer_offer', 'customer_foundation', 'launch_content'],
     instructions: [
       'Write a complete, ready-to-edit sales page for the offer described in the project context.',
@@ -80,6 +106,8 @@ export const HKE_ASSET_TYPES = {
 
 export type HKEAssetType = keyof typeof HKE_ASSET_TYPES
 
+export const HKE_ASSET_TYPE_KEYS = Object.keys(HKE_ASSET_TYPES) as HKEAssetType[]
+
 export function isHKEAssetType(value: unknown): value is HKEAssetType {
   return typeof value === 'string' && Object.prototype.hasOwnProperty.call(HKE_ASSET_TYPES, value)
 }
@@ -88,7 +116,8 @@ export function getHKEAssetLabel(assetType: string): string {
   return isHKEAssetType(assetType) ? HKE_ASSET_TYPES[assetType].label : assetType.replaceAll('_', ' ')
 }
 
-function asText(value: unknown): string {
+/** Flattens a saved projects.content value to trimmed text; empty values become ''. */
+export function asText(value: unknown): string {
   if (typeof value === 'string') return value.trim()
   if (value === null || value === undefined) return ''
   if (Array.isArray(value)) return value.map(asText).filter(Boolean).join('; ')
@@ -96,7 +125,7 @@ function asText(value: unknown): string {
   return String(value)
 }
 
-function asRecord(value: unknown): Record<string, unknown> {
+export function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 }
 
@@ -114,8 +143,8 @@ export function buildHKEAssetContext(
   const content = asRecord(project.content)
   const sections: string[] = [`PROJECT: ${project.title}`]
 
-  const blueprintLines = Object.entries(definition.blueprintFields)
-    .map(([key, label]) => [label, asText(content[key])] as const)
+  const blueprintLines = definition.blueprintFields
+    .map((key) => [HKE_BLUEPRINT_FIELDS[key], asText(content[key])] as const)
     .filter(([, value]) => value)
     .map(([label, value]) => `${label}: ${value}`)
   if (blueprintLines.length) sections.push(`BLUEPRINT\n${blueprintLines.join('\n')}`)

@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
 
 export default function CustomerFoundationPage() {
   const router = useRouter()
+  const { id: projectId } = useParams<{ id: string }>()
   const [foundationType, setFoundationType] = useState('')
   const [customerExperience, setCustomerExperience] = useState('')
   const [customerInfo, setCustomerInfo] = useState('')
@@ -13,8 +15,6 @@ export default function CustomerFoundationPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const projectId = window.location.pathname.split('/')[2]
-
     async function loadSavedCustomerFoundation() {
       try {
         const response = await fetch(`/api/projects/${projectId}/customer-foundation`)
@@ -35,19 +35,19 @@ export default function CustomerFoundationPage() {
     }
 
     loadSavedCustomerFoundation()
-  }, [])
+  }, [projectId])
 
   async function saveCustomerFoundation(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSaving(true)
     try {
-      const response = await fetch(`/api/projects/${window.location.pathname.split('/')[2]}/customer-foundation`, {
+      const response = await fetch(`/api/projects/${projectId}/customer-foundation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ foundationType, customerExperience, customerInfo, firstAction }),
       })
       if (!response.ok) throw new Error('Unable to save customer foundation.')
-      router.push(window.location.pathname.replace('/customer-foundation', ''))
+      router.push(`/projects/${projectId}`)
       router.refresh()
     } catch {
       setSaving(false)
@@ -58,14 +58,14 @@ export default function CustomerFoundationPage() {
   return (
     <main className="min-h-screen bg-brand-black text-white px-6 py-10">
       <div className="max-w-3xl mx-auto">
-        <button type="button" onClick={() => router.back()} className="text-white/60 hover:text-white mb-8">
-          ← Back to blueprint
-        </button>
+        <Link href={`/projects/${projectId}`} className="inline-block text-white/60 hover:text-white mb-8">
+          ← Back to project
+        </Link>
         <p className="text-brand-gold text-sm font-semibold uppercase">Step 03</p>
         <h1 className="text-3xl md:text-4xl font-bold mt-2">Build your customer foundation</h1>
         <p className="text-white/60 leading-7 mt-3 mb-8">
           Define the customer-facing experience your business needs first.
-          Human Leverage AI will use your offer and launch target to shape the
+          HKE will use your offer and launch target to shape the
           foundation without making you start over.
         </p>
         <form onSubmit={saveCustomerFoundation} className="space-y-6">
