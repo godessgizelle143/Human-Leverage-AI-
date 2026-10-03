@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --brand-black:#0a0a0a; --brand-gold:#FFD700; --brand-pink:#FF00A8; }
+:root { --brand-black:#0a0a0a; --brand-gold:#FFD700; --brand-pink:#FF00A8; --brand-turquoise:#7FE6DA; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; background:#0a0a0a; color:#fff; font-family:var(--font-inter),system-ui,sans-serif; -webkit-font-smoothing:antialiased; }

@@ -64,7 +64,7 @@ export default function LaunchTargetPage() {
         <p className="text-brand-gold text-sm font-semibold uppercase">Step 01</p>
         <h1 className="text-3xl md:text-4xl font-bold mt-2">Define your launch target</h1>
         <p className="text-white/60 leading-7 mt-3 mb-8">
-          Turn your blueprint into a specific launch target. Human Leverage AI
+          Turn your blueprint into a specific launch target. HKE AI
           will use this information to guide the next steps without making you
           repeat your original interview.
         </p>

@@ -95,7 +95,7 @@ export default function RegisterPage() {
             We sent a confirmation link to <span className="text-brand-gold">{email}</span>.
           </p>
           <p className="text-sm text-white/40 mb-6">
-            Your 3-day free trial requires no credit card. Open the email and click the confirmation link to activate your Human Leverage AI™ account.
+            Your 3-day free trial requires no credit card. Open the email and click the confirmation link to activate your HKE AI account.
             If you do not see it, check your spam or junk folder.
           </p>
 
@@ -119,7 +119,7 @@ export default function RegisterPage() {
       <div className="absolute inset-0 bg-gradient-radial from-brand-pink/3 via-transparent to-transparent" />
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6"><Sparkles className="w-8 h-8 text-brand-gold" /><span className="text-2xl font-bold gradient-text">Human Leverage AI™</span></Link>
+          <Link href="/" className="inline-flex items-center gap-2 mb-6"><Sparkles className="w-8 h-8 text-brand-gold" /><span className="text-2xl font-bold gradient-text">HKE AI</span></Link>
           <h1 className="text-3xl font-bold mb-2">Start Your Free Trial</h1>
           <p className="text-white/60">3 days completely free · No credit card required</p>
         </div>

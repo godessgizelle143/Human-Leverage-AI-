@@ -22,7 +22,7 @@ export default function Sidebar() {
       <div className="p-6">
         <Link href="/dashboard" className="flex items-center gap-2 mb-10">
           <Sparkles className="w-7 h-7 text-brand-gold" />
-          <span className="text-lg font-bold gradient-text">Human Leverage AI™</span>
+          <span className="text-lg font-bold gradient-text">HKE AI</span>
         </Link>
 
         <nav className="space-y-1">

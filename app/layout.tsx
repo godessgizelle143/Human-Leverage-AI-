@@ -14,11 +14,11 @@ const fraunces = Fraunces({
 })
 
 export const metadata: Metadata = {
-  title: 'Human Leverage AI™ — Speak Once. Build Forever.',
-  description: 'Transform your knowledge into digital products, marketing assets, and business resources with Human Leverage AI™.',
-  keywords: ['AI', 'business automation', 'content generation', 'digital products', 'Human Leverage AI'],
+  title: 'Human Knowledge Engine AI (HKE AI) — Speak Once. Build Forever.',
+  description: 'Transform your knowledge into digital products, marketing assets, and business resources with Human Knowledge Engine AI.',
+  keywords: ['AI', 'business automation', 'content generation', 'digital products', 'Human Knowledge Engine AI', 'HKE AI'],
   openGraph: {
-    title: 'Human Leverage AI™ — Speak Once. Build Forever.',
+    title: 'Human Knowledge Engine AI (HKE AI) — Speak Once. Build Forever.',
     description: 'Turn what you know into assets you can use, share, and sell.',
     type: 'website',
   },

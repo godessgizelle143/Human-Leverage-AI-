@@ -81,7 +81,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <Sparkles className="w-8 h-8 text-brand-gold" />
-            <span className="text-2xl font-bold gradient-text">Human Leverage AI™</span>
+            <span className="text-2xl font-bold gradient-text">HKE AI</span>
           </Link>
           <h1 className="text-3xl font-bold">Welcome Back</h1>
           <p className="text-white/60 mt-2">Sign in to continue building your empire</p>

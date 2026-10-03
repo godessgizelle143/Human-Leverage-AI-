@@ -66,7 +66,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <p className="text-brand-gold text-sm font-semibold mb-2">HUMAN LEVERAGE AI™</p>
+            <p className="text-brand-gold text-sm font-semibold mb-2">HKE AI</p>
             <h1 className="text-3xl font-bold">{project.title}</h1>
           </div>
           <Link href="/dashboard" className="text-white/60 hover:text-white">← Dashboard</Link>

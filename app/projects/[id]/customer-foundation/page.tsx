@@ -65,7 +65,7 @@ export default function CustomerFoundationPage() {
         <h1 className="text-3xl md:text-4xl font-bold mt-2">Build your customer foundation</h1>
         <p className="text-white/60 leading-7 mt-3 mb-8">
           Define the customer-facing experience your business needs first.
-          Human Leverage AI will use your offer and launch target to shape the
+          HKE AI will use your offer and launch target to shape the
           foundation without making you start over.
         </p>
         <form onSubmit={saveCustomerFoundation} className="space-y-6">

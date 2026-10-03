@@ -44,7 +44,7 @@ export default async function DashboardPage() {
     <main className="min-h-screen bg-brand-black text-white px-6 py-12">
       <div className="max-w-6xl mx-auto">
         <div className="mb-10">
-          <p className="text-brand-gold text-sm font-semibold mb-2">HUMAN LEVERAGE AI™</p>
+          <p className="text-brand-gold text-sm font-semibold mb-2">HKE AI</p>
           <h1 className="text-4xl font-bold mb-3">Welcome to your dashboard</h1>
           <p className="text-white/60">{user.email}</p>
         </div>

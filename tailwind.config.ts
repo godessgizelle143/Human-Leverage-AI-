@@ -13,6 +13,7 @@ const config: Config = {
           black: '#0a0a0a',
           gold: '#FFD700',
           pink: '#FF00A8',
+          turquoise: '#7FE6DA',
           white: '#ffffff',
         },
         brass: '#a47b32',
