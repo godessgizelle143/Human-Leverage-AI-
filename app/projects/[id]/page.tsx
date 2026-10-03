@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import ProjectAssets from '@/components/hke/ProjectAssets'
+import type { HKEAsset } from '@/lib/hke/assets'
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createServerSupabaseClient()
@@ -16,6 +18,13 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     .single()
 
   if (error || !project) redirect('/dashboard')
+
+  const { data: assets } = await supabase
+    .from('project_assets')
+    .select('id, project_id, asset_type, title, content, status, version, created_at, updated_at')
+    .eq('project_id', project.id)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
 
   const content = project.content as Record<string, unknown>
 
@@ -150,6 +159,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
               </Link>
             </div>
           </div>
+
+          <ProjectAssets projectId={project.id} initialAssets={(assets ?? []) as HKEAsset[]} />
 
           <div className="space-y-7">
             {Object.entries(content).map(([key, value]) => (
