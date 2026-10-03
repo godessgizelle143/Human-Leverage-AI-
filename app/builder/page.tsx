@@ -126,7 +126,7 @@ export default function BuilderPage() {
           {error && <div className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-red-200">{error}</div>}
           <div className="flex justify-between gap-4 mt-6"><button type="button" onClick={() => setCurrent((value) => Math.max(0, value - 1))} disabled={current === 0 || building} className="btn-secondary disabled:opacity-40">Back</button>{isLast ? <button type="button" onClick={buildAssets} disabled={building} className="btn-primary disabled:opacity-60">{building ? 'Building Your Blueprint…' : 'Build My Blueprint →'}</button> : <button type="button" onClick={() => setCurrent((value) => Math.min(INTERVIEW_QUESTIONS.length - 1, value + 1))} className="btn-primary">Next Question →</button>}</div>
         </div>
-        <p className="text-center text-white/40 text-sm mt-6">Your Professional trial includes up to 25 AI interviews and 25 content builds.</p>
+        <p className="text-center text-white/40 text-sm mt-6">Your Professional trial includes up to 15 AI interviews and 15 content builds.</p>
       </div>
     </main>
   )
