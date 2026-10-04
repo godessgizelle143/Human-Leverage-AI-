@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { PRICING_PLANS, type PlanKey } from '@/lib/stripe/client'
 import { isHumanLeverageOwner } from '@/lib/owner-access'
+import SignOutButton from '@/components/auth/SignOutButton'
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabaseClient()
@@ -43,10 +44,13 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-brand-black text-white px-6 py-12">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-10">
-          <p className="text-brand-gold text-sm font-semibold mb-2">HKE AI</p>
-          <h1 className="text-4xl font-bold mb-3">Welcome to your dashboard</h1>
-          <p className="text-white/60">{user.email}</p>
+        <div className="mb-10 flex items-start justify-between gap-6">
+          <div>
+            <p className="text-brand-gold text-sm font-semibold mb-2">HKE AI</p>
+            <h1 className="text-4xl font-bold mb-3">Welcome to your dashboard</h1>
+            <p className="text-white/60">{user.email}</p>
+          </div>
+          <SignOutButton />
         </div>
 
         {subscription ? (

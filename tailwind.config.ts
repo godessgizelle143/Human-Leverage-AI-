@@ -11,9 +11,8 @@ const config: Config = {
       colors: {
         brand: {
           black: '#0a0a0a',
-          gold: '#FFD700',
-          pink: '#FF00A8',
-          turquoise: '#7FE6DA',
+          gold: '#D4AF37',
+          pink: '#FF1493',
           white: '#ffffff',
         },
         brass: '#a47b32',
@@ -22,7 +21,7 @@ const config: Config = {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-brand': 'linear-gradient(135deg, #FFD700 0%, #FF00A8 100%)',
+        'gradient-brand': 'linear-gradient(135deg, #D4AF37 0%, #FF1493 100%)',
       },
       animation: {
         glow: 'glow 2s ease-in-out infinite alternate',
@@ -30,8 +29,8 @@ const config: Config = {
       },
       keyframes: {
         glow: {
-          '0%': { boxShadow: '0 0 5px #FFD700, 0 0 10px #FFD700' },
-          '100%': { boxShadow: '0 0 20px #FF00A8, 0 0 30px #FF00A8' },
+          '0%': { boxShadow: '0 0 5px #D4AF37, 0 0 10px #D4AF37' },
+          '100%': { boxShadow: '0 0 20px #FF1493, 0 0 30px #FF1493' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },

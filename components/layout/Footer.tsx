@@ -11,7 +11,7 @@ export default function Footer() {
               <Sparkles className="w-5 h-5 text-brand-gold" />
               <span className="font-bold gradient-text">Human Knowledge Engine AI</span>
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-turquoise/80 mb-3">HKE AI</p>
+            <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-gold/80 mb-3">HKE AI</p>
             <p className="text-sm text-white/40 leading-relaxed">
               Transform a single conversation into a complete digital business.
             </p>
@@ -49,7 +49,7 @@ export default function Footer() {
           <p className="text-sm text-white/30">
             &copy; {new Date().getFullYear()} Human Leverage AI™. All rights reserved.
           </p>
-          <p className="text-sm text-brand-turquoise/60">
+          <p className="text-sm text-brand-gold/60">
             Speak Once. Build Forever.
           </p>
         </div>
