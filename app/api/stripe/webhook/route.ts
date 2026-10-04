@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getStripeClient } from '@/lib/stripe/client'
+import { getSubscriptionPeriod } from '@/lib/stripe/period'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 
 function mapStatus(
@@ -10,26 +11,6 @@ function mapStatus(
   if (status === 'trialing') return 'trialing'
   if (status === 'past_due') return 'past_due'
   return 'cancelled'
-}
-
-type SubscriptionPeriodItem = Stripe.SubscriptionItem & {
-  current_period_start?: number
-  current_period_end?: number
-}
-
-function getSubscriptionPeriod(
-  subscription: Stripe.Subscription
-): { start: string; end: string } | null {
-  const item = subscription.items.data[0] as SubscriptionPeriodItem | undefined
-
-  if (!item || item.current_period_start == null || item.current_period_end == null) {
-    return null
-  }
-
-  return {
-    start: new Date(item.current_period_start * 1000).toISOString(),
-    end: new Date(item.current_period_end * 1000).toISOString()
-  }
 }
 
 export async function POST(request: Request) {
@@ -103,7 +84,7 @@ export async function POST(request: Request) {
 
         if (!period) {
           console.error(
-            'Subscription has no items; cannot determine billing period:',
+            'Subscription has no billing period data:',
             subscription.id
           )
 
@@ -162,7 +143,7 @@ export async function POST(request: Request) {
 
       if (!period) {
         console.error(
-          'Subscription has no items; cannot determine billing period:',
+          'Subscription has no billing period data:',
           subscription.id
         )
 

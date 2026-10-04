@@ -1,167 +1,199 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { INTERVIEW_QUESTIONS } from '@/types/interview'
+import { HLAI_CAPABILITIES } from '@/lib/ai/capabilities'
+import { getUserUsage } from '@/lib/hke/access'
+import { blueprintEntries, stepEntries } from '@/lib/hke/blueprint'
+import { canGenerateAsset } from '@/lib/hke/entitlements'
+import { answeredCount, parseInterviewMessages, TOTAL_QUESTIONS } from '@/lib/hke/interview'
+import { assembleKnowledge } from '@/lib/hke/knowledge'
+import { deriveLifecycle } from '@/lib/hke/lifecycle'
+import { listProjectAssets, loadOwnedProject } from '@/lib/hke/projects'
+import { isUuid } from '@/lib/hke/server'
+import { STEP_SECTIONS } from '@/lib/hke/steps'
+import AppHeader from '@/components/hke/AppHeader'
+import ArchiveButton from '@/components/hke/ArchiveButton'
+import AssetStudio from '@/components/hke/AssetStudio'
+import RefreshButton from '@/components/hke/RefreshButton'
+import UsagePanel from '@/components/hke/UsagePanel'
+import { LifecycleBadge, LifecycleTrack, ProgressMeter } from '@/components/hke/LifecycleBadge'
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+export const dynamic = 'force-dynamic'
+
+export default async function ProjectWorkspacePage({ params }: { params: { id: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) redirect('/login')
+  if (!isUuid(params.id)) redirect('/dashboard')
 
-  const { data: project, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', params.id)
-    .eq('user_id', user.id)
-    .single()
+  const project = await loadOwnedProject(supabase, user.id, params.id)
+  if (!project) redirect('/dashboard')
 
-  if (error || !project) redirect('/dashboard')
+  const [{ data: interview }, assets, { usage }] = await Promise.all([
+    supabase.from('interviews').select('id, status, messages').eq('id', project.interview_id).eq('user_id', user.id).maybeSingle(),
+    listProjectAssets(supabase, user.id, project.id),
+    getUserUsage(supabase, user),
+  ])
 
-  const content = project.content as Record<string, unknown>
+  const { answers } = parseInterviewMessages(interview?.messages)
+  const answered = answeredCount(answers)
+  const stage = deriveLifecycle(interview, project, assets)
+  const archived = !!project.archived_at
+  const building = project.status !== 'completed'
+  const knowledge = assembleKnowledge(project, answers)
+  const blueprint = blueprintEntries(project.content)
 
-  const recommendedModules = Array.isArray(content.recommended_modules)
-    ? content.recommended_modules.filter((module): module is string => typeof module === 'string')
+  const recommended = Array.isArray(project.content.recommended_modules)
+    ? project.content.recommended_modules.map((id) => HLAI_CAPABILITIES.find((capability) => capability.id === id)).filter((capability): capability is (typeof HLAI_CAPABILITIES)[number] => Boolean(capability))
     : []
 
-  const moduleSteps: Record<string, { title: string; description: string }> = {
-    'app-builder': {
-      title: 'Build your customer-facing foundation',
-      description: 'Turn the blueprint into the website, booking flow, or application your customers will use.',
-    },
-    'content-strategy': {
-      title: 'Create your launch content plan',
-      description: 'Turn your positioning into a practical 30/60/90-day content plan for reaching your first customers.',
-    },
-    'social-media-manager': {
-      title: 'Start your social launch',
-      description: 'Create the social presence and launch activity that puts your offer in front of the right audience.',
-    },
-    'email-outreach': {
-      title: 'Build your first outreach sequence',
-      description: 'Create a focused outreach sequence for prospective customers, partners, or local relationships.',
-    },
-    'performance-report': {
-      title: 'Measure what happens next',
-      description: 'Track your early results so you can see what is working and decide what to improve.',
-    },
-  }
-
-  const nextMoves = [
-    {
-      title: 'Define your launch target',
-      description: 'Choose the specific audience, location, offer, and first milestone you are launching toward.',
-    },
-    {
-      title: 'Turn the offer into something customers can act on',
-      description: 'Make the service, product, pricing, and next action clear enough that someone can buy, book, or contact you.',
-    },
-    ...recommendedModules
-      .map((module) => moduleSteps[module] ? { ...moduleSteps[module], module } : null)
-      .filter((move): move is { title: string; description: string; module: string } => Boolean(move))
-      .slice(0, 3),
-  ].map((move, index) => ({ ...move, number: index + 1 }))
+  const steps = STEP_SECTIONS.map((step) => ({ ...step, entries: stepEntries(project.content, step.key) }))
+  const nextStep = steps.find((step) => !step.entries?.length)
+  const pitch = blueprint.find((entry) => entry.key === 'elevator_pitch')
+  const completedAssets = assets.filter((asset) => asset.status === 'completed').length
 
   return (
-    <main className="min-h-screen bg-brand-black text-white px-6 py-10">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <p className="text-brand-gold text-sm font-semibold mb-2">HKE AI</p>
-            <h1 className="text-3xl font-bold">{project.title}</h1>
+    <main className="min-h-screen bg-brand-black text-white">
+      <AppHeader backHref="/dashboard" backLabel="Dashboard" />
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-brand-gold text-sm font-semibold">HKE AI PROJECT</p>
+              <LifecycleBadge stage={stage} />
+            </div>
+            <h1 className="mt-2 text-3xl sm:text-4xl font-bold break-words">{project.title}</h1>
+            {pitch && typeof pitch.value === 'string' && <p className="mt-3 max-w-3xl text-white/65 leading-7">{pitch.value}</p>}
           </div>
-          <Link href="/dashboard" className="text-white/60 hover:text-white">← Dashboard</Link>
+          {!building && (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm lg:justify-end">
+              <a href={`/api/projects/${project.id}/export?format=md`} className="text-white/70 hover:text-white">Download blueprint (.md)</a>
+              <a href={`/api/projects/${project.id}/export?format=html`} className="text-white/70 hover:text-white">Printable (.html)</a>
+              <ArchiveButton kind="project" id={project.id} archived={archived} />
+            </div>
+          )}
         </div>
 
-        <div className="glass rounded-2xl p-8">
-          <div className="mb-8">
-            <p className="text-brand-gold font-semibold">Your assets are ready</p>
-            <h2 className="text-2xl font-semibold mt-2">Your business blueprint</h2>
-          </div>
+        <div className="mt-8"><LifecycleTrack stage={stage} /></div>
 
-          <section className="mb-10 rounded-2xl border border-brand-gold/30 bg-brand-gold/5 p-6">
-            <p className="text-brand-gold text-sm font-semibold uppercase tracking-wide">What happens next</p>
-            <h3 className="text-2xl font-semibold mt-1">Your next moves</h3>
-            <p className="text-white/60 mt-2 mb-5">Use your blueprint as the starting point. Complete these moves in order.</p>
-            <div className="space-y-4">
-              {nextMoves.map((move) => (
-                <div key={move.number} className="flex gap-4 rounded-xl border border-white/10 bg-black/20 p-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-brand-gold/50 text-brand-gold font-semibold">
-                    {move.number}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">{move.title}</h4>
-                    <p className="text-white/70 leading-6 mt-1">{move.description}</p>
-                  </div>
+        {building ? (
+          <div className="mt-8 rounded-2xl border border-brand-pink/30 bg-brand-pink/5 p-6">
+            <p className="font-semibold">HKE AI is extracting your knowledge into a blueprint…</p>
+            <p className="mt-2 text-sm text-white/60">This usually takes under a minute. If it was interrupted, your credits are refunded automatically and you can build again from the interview.</p>
+            <div className="mt-4 flex flex-wrap gap-4">
+              <RefreshButton />
+              <Link href={`/builder?interview=${project.interview_id}`} className="text-sm text-white/60 hover:text-white">Back to interview</Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            {archived && <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4 text-sm text-white/60">This project is archived. Everything is preserved — restore it to keep building.</div>}
+
+            <div className="mt-8 rounded-2xl border border-brand-gold/30 bg-gradient-to-br from-brand-gold/10 via-transparent to-brand-pink/10 p-5 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-gold">Continue where you left off</p>
+              {nextStep ? (
+                <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-lg font-semibold">Next: {nextStep.label}</p>
+                  <Link href={`/projects/${project.id}/${nextStep.path}`} className="btn-primary justify-center">Continue →</Link>
                 </div>
-              ))}
+              ) : (
+                <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-lg font-semibold">{completedAssets ? 'Your plan is complete. Keep building assets from your knowledge.' : 'Your plan is complete. Generate your first asset below.'}</p>
+                  <a href="#assets" className="btn-primary justify-center">Go to assets →</a>
+                </div>
+              )}
             </div>
-          </section>
 
-          <div className="mb-10 rounded-2xl border border-brand-gold/30 bg-white/5 p-6">
-            <p className="text-brand-gold font-semibold">What happens next</p>
-            <h3 className="text-xl font-semibold mt-2">Turn your blueprint into action</h3>
-            <p className="text-white/70 mt-2 leading-7">
-              Choose the next step you want to build from this blueprint.
-            </p>
+            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
+              <div className="space-y-6 min-w-0">
+                <section className="glass rounded-2xl p-5 sm:p-7">
+                  <p className="text-brand-pink text-xs font-semibold uppercase tracking-wider">Understand · structured knowledge</p>
+                  <h2 className="text-2xl font-bold">What HKE AI knows</h2>
+                  <p className="mt-1 text-sm text-white/50">{knowledge.items.length} knowledge items from {knowledge.sources.map((source) => source.label.toLowerCase()).join(', ') || 'no sources yet'}.</p>
+                  {blueprint.length ? (
+                    <div className="mt-6 grid gap-4 md:grid-cols-2">
+                      {blueprint.filter((entry) => entry.key !== 'elevator_pitch').map((entry) => (
+                        <article key={entry.key} className="rounded-xl border border-white/10 bg-white/[.03] p-4 min-w-0">
+                          <h3 className="text-sm font-semibold uppercase tracking-wide text-brand-gold">{entry.label}</h3>
+                          {typeof entry.value === 'string' ? (
+                            <p className="mt-2 text-white/75 leading-7 whitespace-pre-wrap break-words">{entry.value}</p>
+                          ) : (
+                            <ul className="mt-2 space-y-1.5 text-white/75 leading-6">
+                              {entry.value.map((item, index) => (
+                                <li key={index} className="flex gap-2 break-words"><span className="text-brand-pink">•</span><span>{typeof item === 'string' ? item : <><strong className="text-white">{item.label}:</strong> {item.value}</>}</span></li>
+                              ))}
+                            </ul>
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-white/60">No blueprint content was saved for this project.</p>
+                  )}
+                </section>
 
-            <div className="grid gap-4 md:grid-cols-2 mt-6">
-              <Link
-                href={`/projects/${params.id}/launch-target`}
-                className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
-              >
-                <span className="text-brand-gold font-semibold">01</span>
-                <h4 className="text-lg font-semibold mt-2">Define your launch target</h4>
-                <p className="text-white/60 text-sm mt-1">
-                  Clarify your audience, service area, offer, and first milestone.
-                </p>
-              </Link>
+                <div id="assets" className="scroll-mt-24">
+                  <AssetStudio projectId={project.id} initialAssets={assets} archived={archived} canGenerate={canGenerateAsset(usage)} buildsRemaining={usage?.builds.remaining ?? 0} hasPlan={!!usage?.active} />
+                </div>
+              </div>
 
-              <Link
-                href={`/projects/${params.id}/customer-offer`}
-                className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition"
-              >
-                <span className="text-brand-gold font-semibold">02</span>
-                <h4 className="text-lg font-semibold mt-2">Build your customer offer</h4>
-                <p className="text-white/60 text-sm mt-1">
-                  Turn the idea into a clear service, pricing structure, and customer action.
-                </p>
-              </Link>
+              <aside className="space-y-6">
+                <UsagePanel usage={usage} compact />
 
-              <Link
-                href={`/projects/${params.id}/customer-foundation`}
-                className="rounded-xl border border-brand-gold/30 bg-brand-gold/5 p-5 hover:bg-brand-gold/10 transition"
-              >
-                <span className="text-brand-gold font-semibold">03</span>
-                <h4 className="text-lg font-semibold mt-2">Build your customer foundation</h4>
-                <p className="text-white/60 text-sm mt-1">
-                  Create the website, booking flow, or application customers will use.
-                </p>
-              </Link>
+                <section className="glass rounded-2xl p-5">
+                  <h2 className="font-semibold">Launch plan</h2>
+                  <ol className="mt-4 space-y-3">
+                    {steps.map((step, index) => {
+                      const done = !!step.entries?.length
+                      return (
+                        <li key={step.key}>
+                          <Link href={`/projects/${project.id}/${step.path}`} className="flex items-start gap-3 rounded-xl border border-white/10 p-3 transition hover:border-brand-gold/40">
+                            <span className={done ? 'grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-brand text-xs font-bold text-brand-black' : 'grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/20 text-xs text-white/60'}>{done ? '✓' : index + 1}</span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold">{step.label}</span>
+                              <span className="block text-xs text-white/50 truncate">{done ? step.entries![0].value : 'Not started'}</span>
+                            </span>
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ol>
+                </section>
 
-              <Link
-                href={`/projects/${params.id}/launch-content`}
-                className="rounded-xl border border-brand-gold/30 bg-brand-gold/5 p-5 hover:bg-brand-gold/10 transition"
-              >
-                <span className="text-brand-gold font-semibold">04</span>
-                <h4 className="text-lg font-semibold mt-2">Create your launch content</h4>
-                <p className="text-white/60 text-sm mt-1">
-                  Build a practical 30/60/90-day plan from your positioning.
-                </p>
-              </Link>
+                <section className="glass rounded-2xl p-5">
+                  <h2 className="font-semibold">Knowledge interview</h2>
+                  <div className="mt-3"><ProgressMeter value={Math.round((answered / TOTAL_QUESTIONS) * 100)} label={`${answered} of ${TOTAL_QUESTIONS} answered`} /></div>
+                  <details className="mt-4 group">
+                    <summary className="cursor-pointer text-sm text-brand-gold">View your answers</summary>
+                    <dl className="mt-3 space-y-3">
+                      {INTERVIEW_QUESTIONS.map((question) => (
+                        <div key={question.id}>
+                          <dt className="text-xs text-white/50">{question.question}</dt>
+                          <dd className="mt-0.5 text-sm text-white/80 whitespace-pre-wrap break-words">{answers[String(question.id)]?.trim() || <span className="text-white/30">Not answered</span>}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </details>
+                </section>
+
+                {recommended.length > 0 && (
+                  <section className="glass rounded-2xl p-5">
+                    <h2 className="font-semibold">Recommended capabilities</h2>
+                    <ul className="mt-3 space-y-3">
+                      {recommended.map((capability) => (
+                        <li key={capability.id}>
+                          <p className="text-sm font-semibold">{capability.name} {capability.stage === 'planned' && <span className="ml-1 text-xs font-normal text-white/40">coming soon</span>}</p>
+                          <p className="text-xs text-white/50 leading-5">{capability.description}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </aside>
             </div>
-          </div>
-
-          <div className="space-y-7">
-            {Object.entries(content).map(([key, value]) => (
-              <section key={key}>
-                <h3 className="text-lg font-semibold capitalize mb-2">{key.replaceAll('_', ' ')}</h3>
-                <p className="text-white/80 leading-7 whitespace-pre-wrap">
-                  {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-                </p>
-              </section>
-            ))}
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </main>
   )
