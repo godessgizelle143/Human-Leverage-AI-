@@ -111,7 +111,15 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="text-sm text-white/60">Password</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-white/60">Password</label>
+                <Link
+                  href={email.trim() ? `/forgot-password?email=${encodeURIComponent(email.trim())}` : '/forgot-password'}
+                  className="text-sm text-brand-gold"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative mt-1">
                 <Lock className="absolute left-3 top-3 w-5 h-5 text-white/30" />
                 <input
