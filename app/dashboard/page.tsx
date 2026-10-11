@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { PRICING_PLANS, type PlanKey } from '@/lib/stripe/client'
+import { dashboardNotice } from '@/lib/auth/messages'
 import { getUserUsage } from '@/lib/hke/access'
 import { assetTypeLabel, displayStatus, type AssetSummary } from '@/lib/hke/assets'
 import { stepEntries } from '@/lib/hke/blueprint'
@@ -12,6 +13,7 @@ import { STEP_SECTIONS } from '@/lib/hke/steps'
 import AppHeader from '@/components/hke/AppHeader'
 import ArchiveButton from '@/components/hke/ArchiveButton'
 import NewProjectButton from '@/components/hke/NewProjectButton'
+import RefreshButton from '@/components/hke/RefreshButton'
 import UsagePanel from '@/components/hke/UsagePanel'
 import { LifecycleBadge, ProgressMeter } from '@/components/hke/LifecycleBadge'
 
@@ -19,7 +21,7 @@ export const dynamic = 'force-dynamic'
 
 type ProjectListRow = Pick<ProjectRow, 'id' | 'title' | 'status' | 'interview_id' | 'content' | 'archived_at' | 'created_at' | 'updated_at'>
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: { checkout?: string | string[]; error?: string | string[] } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -29,11 +31,15 @@ export default async function DashboardPage() {
 
   // New authenticated users receive the cardless trial through the database RPC.
   // This keeps trial creation behind auth.uid() and avoids a direct subscriptions INSERT.
+  let trialFailed = false
   if (!access.subscription) {
     const { error: trialError } = await supabase.rpc('start_trial')
-    if (!trialError) access = await getUserUsage(supabase, user)
+    if (trialError) console.error('CARDLESS TRIAL CREATION ERROR:', trialError.message)
+    else access = await getUserUsage(supabase, user)
+    trialFailed = !access.subscription && !access.isOwner
   }
   const { isOwner, subscription, usage } = access
+  const notice = dashboardNotice(searchParams)
   const hasAccess = !!usage?.active
   const canStart = canGenerateBlueprint(usage)
 
@@ -96,6 +102,29 @@ export default async function DashboardPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-2">Welcome to your dashboard</h1>
           <p className="text-white/60 break-all">{user.email}</p>
         </div>
+
+        {notice && (
+          <div
+            role="status"
+            className={
+              notice.tone === 'success'
+                ? 'mb-6 rounded-xl border border-green-500/25 bg-green-500/10 p-4 text-sm text-green-300'
+                : notice.tone === 'error'
+                  ? 'mb-6 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-200'
+                  : 'mb-6 rounded-xl border border-white/15 bg-white/5 p-4 text-sm text-white/70'
+            }
+          >
+            {notice.message}
+          </div>
+        )}
+
+        {trialFailed && (
+          <div role="alert" className="mb-6 rounded-xl border border-brand-pink/30 bg-brand-pink/5 p-4 text-sm">
+            <p className="font-semibold">We couldn&apos;t activate your free trial yet.</p>
+            <p className="mt-1 text-white/60">Your account is ready and nothing was charged. This is usually temporary.</p>
+            <div className="mt-3"><RefreshButton label="Try again" /></div>
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] mb-10">
           <section className="relative overflow-hidden rounded-2xl border border-brand-gold/30 bg-gradient-to-br from-brand-gold/10 via-white/[.02] to-brand-pink/10 p-6 sm:p-8">

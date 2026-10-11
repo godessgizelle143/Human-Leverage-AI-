@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServiceRoleClient } from '@/lib/supabase/server'
-import { isHumanLeverageOwner } from '@/lib/owner-access'
+import { isOwnerUser } from '@/lib/owner-access'
 import { errorResponse, HkeError } from '@/lib/hke/errors'
 import { generateBlueprint } from '@/lib/hke/generation/services'
 import { supabaseGenerationStore } from '@/lib/hke/generation/store'
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     const { projectId } = await generateBlueprint(
       { store: supabaseGenerationStore(createServiceRoleClient()), provider: openAIProvider },
-      { userId: user.id, interviewId: interview.id, title: titleFromAnswers(state.answers), interview: { ...state, archived: false }, skipEntitlement: isHumanLeverageOwner(user.email) },
+      { userId: user.id, interviewId: interview.id, title: titleFromAnswers(state.answers), interview: { ...state, archived: false }, skipEntitlement: isOwnerUser(user) },
     )
 
     return NextResponse.json({ success: true, project: { id: projectId } })

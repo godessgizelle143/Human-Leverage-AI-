@@ -15,6 +15,7 @@ import { STEP_SECTIONS } from '@/lib/hke/steps'
 import AppHeader from '@/components/hke/AppHeader'
 import ArchiveButton from '@/components/hke/ArchiveButton'
 import AssetStudio from '@/components/hke/AssetStudio'
+import KnowledgeKitPanel from '@/components/hke/KnowledgeKitPanel'
 import RefreshButton from '@/components/hke/RefreshButton'
 import UsagePanel from '@/components/hke/UsagePanel'
 import { LifecycleBadge, LifecycleTrack, ProgressMeter } from '@/components/hke/LifecycleBadge'
@@ -52,6 +53,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
   const nextStep = steps.find((step) => !step.entries?.length)
   const pitch = blueprint.find((entry) => entry.key === 'elevator_pitch')
   const completedAssets = assets.filter((asset) => asset.status === 'completed').length
+  const planStepsDone = steps.filter((step) => step.entries?.length).length
 
   return (
     <main className="min-h-screen bg-brand-black text-white">
@@ -99,8 +101,11 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
                 </div>
               ) : (
                 <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-lg font-semibold">{completedAssets ? 'Your plan is complete. Keep building assets from your knowledge.' : 'Your plan is complete. Generate your first asset below.'}</p>
-                  <a href="#assets" className="btn-primary justify-center">Go to assets →</a>
+                  <p className="text-lg font-semibold">{completedAssets ? 'Your plan is complete. Keep building assets, or take your kit with you.' : 'Your plan is complete. Generate your first asset below.'}</p>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <a href="#assets" className={completedAssets ? 'btn-secondary justify-center' : 'btn-primary justify-center'}>Go to assets →</a>
+                    {completedAssets > 0 && <a href="#kit" className="btn-primary justify-center">Your Knowledge Kit →</a>}
+                  </div>
                 </div>
               )}
             </div>
@@ -136,6 +141,8 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
                 <div id="assets" className="scroll-mt-24">
                   <AssetStudio projectId={project.id} initialAssets={assets} archived={archived} canGenerate={canGenerateAsset(usage)} buildsRemaining={usage?.builds.remaining ?? 0} hasPlan={!!usage?.active} />
                 </div>
+
+                <KnowledgeKitPanel projectId={project.id} assets={assets} hasBlueprint={blueprint.length > 0} planStepsDone={planStepsDone} answered={answered} />
               </div>
 
               <aside className="space-y-6">

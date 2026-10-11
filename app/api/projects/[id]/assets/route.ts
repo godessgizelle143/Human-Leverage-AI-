@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServiceRoleClient } from '@/lib/supabase/server'
-import { isHumanLeverageOwner } from '@/lib/owner-access'
+import { isOwnerUser } from '@/lib/owner-access'
 import { ASSET_TYPE_IDS, getAssetType } from '@/lib/hke/assets'
 import { ASSET_COLUMNS } from '@/lib/hke/db'
 import { errorResponse, HkeError, notFound } from '@/lib/hke/errors'
@@ -50,7 +50,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     const { assetId } = await generateAsset(
       { store: supabaseGenerationStore(createServiceRoleClient()), provider: openAIProvider },
-      { userId: user.id, projectId: project.id, type, knowledge, skipEntitlement: isHumanLeverageOwner(user.email) },
+      { userId: user.id, projectId: project.id, type, knowledge, skipEntitlement: isOwnerUser(user) },
     )
 
     const { data: asset } = await supabase.from('project_assets').select(ASSET_COLUMNS).eq('id', assetId).eq('user_id', user.id).maybeSingle()

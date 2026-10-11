@@ -40,12 +40,7 @@ export async function GET(request: Request) {
 
   if (error || !data.url) {
     console.error('GOOGLE OAUTH ERROR:', error?.message || 'No OAuth URL returned')
-    return NextResponse.redirect(
-      new URL(
-        `/login?error=${encodeURIComponent(error?.message || 'Google login failed')}`,
-        request.url
-      )
-    )
+    return NextResponse.redirect(new URL('/login?error=oauth-failed', request.url))
   }
 
   const response = NextResponse.redirect(data.url)

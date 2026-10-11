@@ -109,15 +109,7 @@ export function markdownToHtml(source: string) {
     .join('\n')
 }
 
-/** A standalone, print-ready HTML document (open it and use Print → Save as PDF). */
-export function printableHtmlDocument(title: string, markdown: string) {
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${escapeHtml(title)}</title>
-<style>
+const PRINT_STYLES = `
   body { font-family: Georgia, 'Times New Roman', serif; color: #171512; max-width: 720px; margin: 48px auto; padding: 0 24px; line-height: 1.65; }
   h1, h2, h3 { font-family: Helvetica, Arial, sans-serif; line-height: 1.25; }
   h1 { font-size: 2rem; border-bottom: 3px solid #D4AF37; padding-bottom: .4rem; }
@@ -126,15 +118,29 @@ export function printableHtmlDocument(title: string, markdown: string) {
   blockquote { border-left: 3px solid #FF1493; margin: 1rem 0; padding: .25rem 1rem; color: #444; }
   hr { border: 0; border-top: 1px solid #ddd; margin: 2rem 0; }
   footer { margin-top: 3rem; font: 12px Helvetica, Arial, sans-serif; color: #888; }
-  @media print { body { margin: 0 auto; } }
+  @media print { body { margin: 0 auto; } }`
+
+/** The print-ready page every HKE export uses. `body` must already be escaped HTML. */
+export function printableShell(title: string, body: string, extraStyles = '') {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escapeHtml(title)}</title>
+<style>${PRINT_STYLES}${extraStyles}
 </style>
 </head>
 <body>
-<h1>${escapeHtml(title)}</h1>
-${markdownToHtml(markdown)}
+${body}
 <footer>Created with HKE AI — Speak Once. Build Forever.</footer>
 </body>
 </html>`
+}
+
+/** A standalone, print-ready HTML document (open it and use Print → Save as PDF). */
+export function printableHtmlDocument(title: string, markdown: string) {
+  return printableShell(title, `<h1>${escapeHtml(title)}</h1>\n${markdownToHtml(markdown)}`)
 }
 
 export function safeFilename(name: string) {

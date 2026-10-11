@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/client'
+import { authErrorMessage } from '@/lib/auth/messages'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -21,11 +22,46 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
+  const [unconfirmed, setUnconfirmed] = useState(false)
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
+
+  // Errors from the auth callback arrive as fixed codes; show their message
+  // once, then drop the code from the address bar.
+  useEffect(() => {
+    const message = authErrorMessage(new URLSearchParams(window.location.search).get('error'))
+    if (message) {
+      setError(message)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
+
+  async function handleResendConfirmation() {
+    setResendState('sending')
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
+      })
+      if (error) {
+        setError('We could not resend the confirmation email right now. Please wait a moment and try again.')
+        setResendState('idle')
+        return
+      }
+      setResendState('sent')
+    } catch {
+      setError('We could not resend the confirmation email right now. Please wait a moment and try again.')
+      setResendState('idle')
+    }
+  }
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setUnconfirmed(false)
+    setResendState('idle')
 
     try {
       const supabase = createClient()
@@ -35,14 +71,19 @@ export default function LoginPage() {
       })
 
       if (error) {
-        setError(error.message)
+        if (error.code === 'email_not_confirmed') {
+          setUnconfirmed(true)
+          setError('Please confirm your email before signing in. Check your inbox and spam folder for the confirmation link.')
+        } else {
+          setError(error.message)
+        }
         return
       }
 
       router.push('/dashboard')
       router.refresh()
     } catch (err) {
-      console.log(err)
+      console.error('SIGN IN ERROR:', err)
       setError('Unable to sign in. Please try again.')
     } finally {
       setLoading(false)
@@ -89,8 +130,18 @@ export default function LoginPage() {
 
         <div className="glass rounded-2xl p-8">
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400">
+            <div role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400">
               {error}
+              {unconfirmed && (
+                <button
+                  type="button"
+                  onClick={handleResendConfirmation}
+                  disabled={resendState !== 'idle' || !email.trim()}
+                  className="mt-2 block text-sm font-semibold text-brand-gold hover:underline disabled:opacity-60 disabled:no-underline"
+                >
+                  {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? 'Confirmation email sent' : 'Resend confirmation email'}
+                </button>
+              )}
             </div>
           )}
 

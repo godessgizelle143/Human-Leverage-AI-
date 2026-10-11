@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import clsx from 'clsx'
 import type { ProjectAssetRow } from '@/lib/hke/db'
@@ -16,31 +16,73 @@ export default function AssetEditor({ projectId, asset, typeLabel }: { projectId
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState<Date | null>(null)
   const [error, setError] = useState('')
+  const [deleting, setDeleting] = useState(false)
   const dirty = title !== asset.title || content !== asset.content
+  const canSave = dirty && !saving && title.trim().length > 0
 
-  useEffect(() => {
-    const warn = (event: BeforeUnloadEvent) => { if (dirty) event.preventDefault() }
-    window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
-  }, [dirty])
-
-  async function save() {
+  const save = useCallback(async () => {
     setSaving(true)
     setError('')
-    const response = await fetch(`/api/projects/${projectId}/assets/${asset.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content }) })
-    const data = await response.json().catch(() => ({}))
-    setSaving(false)
-    if (!response.ok) { setError(data.error || 'Unable to save this asset.'); return }
-    setSavedAt(new Date())
-    router.refresh()
-  }
+    try {
+      const response = await fetch(`/api/projects/${projectId}/assets/${asset.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content }) })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) { setError(data.error || 'Unable to save this asset.'); return }
+      setSavedAt(new Date())
+      router.refresh()
+    } catch {
+      setError('Could not reach HKE AI. Check your connection — your edits are still here — and save again.')
+    } finally {
+      setSaving(false)
+    }
+  }, [asset.id, content, projectId, router, title])
+
+  // Leaving the page: the browser prompt covers reloads and closing the tab;
+  // the click guard covers in-app links, which never fire beforeunload.
+  useEffect(() => {
+    if (!dirty) return
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault() }
+    const guardLinks = (event: MouseEvent) => {
+      const link = (event.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null
+      if (!link || link.target === '_blank' || link.hasAttribute('download')) return
+      const url = new URL(link.href, window.location.href)
+      if (url.origin !== window.location.origin || url.pathname.startsWith('/api/')) return
+      if (!window.confirm('You have unsaved changes to this asset. Leave without saving?')) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    }
+    window.addEventListener('beforeunload', warn)
+    document.addEventListener('click', guardLinks, true)
+    return () => {
+      window.removeEventListener('beforeunload', warn)
+      document.removeEventListener('click', guardLinks, true)
+    }
+  }, [dirty])
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault()
+        if (canSave) void save()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [canSave, save])
 
   async function remove() {
     if (!window.confirm('Delete this asset permanently?')) return
-    const response = await fetch(`/api/projects/${projectId}/assets/${asset.id}`, { method: 'DELETE' })
-    if (!response.ok) { const data = await response.json().catch(() => ({})); setError(data.error || 'Unable to delete this asset.'); return }
-    router.push(`/projects/${projectId}#assets`)
-    router.refresh()
+    setDeleting(true)
+    setError('')
+    try {
+      const response = await fetch(`/api/projects/${projectId}/assets/${asset.id}`, { method: 'DELETE' })
+      if (!response.ok) { const data = await response.json().catch(() => ({})); setError(data.error || 'Unable to delete this asset.'); setDeleting(false); return }
+      router.push(`/projects/${projectId}#assets`)
+      router.refresh()
+    } catch {
+      setError('Could not reach HKE AI. Check your connection and try again.')
+      setDeleting(false)
+    }
   }
 
   return (
@@ -58,11 +100,11 @@ export default function AssetEditor({ projectId, asset, typeLabel }: { projectId
             <button key={value} type="button" onClick={() => setMode(value)} className={clsx('rounded-md px-4 py-1.5 text-sm capitalize', mode === value ? 'bg-gradient-brand font-semibold text-brand-black' : 'text-white/60 hover:text-white')}>{value}</button>
           ))}
         </div>
-        <button type="button" onClick={save} disabled={!dirty || saving} className="btn-primary !py-2 text-sm disabled:opacity-50">{saving ? 'Saving…' : 'Save changes'}</button>
-        <span className="text-sm text-white/50" aria-live="polite">{dirty ? 'Unsaved changes' : savedAt ? `Saved ${savedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : ''}</span>
+        <button type="button" onClick={save} disabled={!canSave} title="Save (Ctrl/⌘ + S)" className="btn-primary !py-2 text-sm disabled:opacity-50">{saving ? 'Saving…' : 'Save changes'}</button>
+        <span className="text-sm text-white/50" aria-live="polite">{!title.trim() ? 'Add a title to save' : dirty ? 'Unsaved changes' : savedAt ? `Saved ${savedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : ''}</span>
       </div>
 
-      {error && <div className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200">{error}</div>}
+      {error && <div role="alert" className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200">{error}</div>}
 
       <div className="mt-6 glass rounded-2xl p-5 sm:p-8">
         {mode === 'edit' ? (
@@ -81,7 +123,7 @@ export default function AssetEditor({ projectId, asset, typeLabel }: { projectId
           <a href={`/api/projects/${projectId}/assets/${asset.id}/export?format=md`} className="text-brand-gold hover:underline">Markdown (.md)</a>
           <a href={`/api/projects/${projectId}/assets/${asset.id}/export?format=html`} className="text-brand-gold hover:underline">Print-ready (.html → PDF)</a>
         </div>
-        <button type="button" onClick={remove} className="text-sm text-red-300/80 hover:text-red-200 self-start sm:self-auto">Delete asset</button>
+        <button type="button" onClick={remove} disabled={deleting} className="text-sm text-red-300/80 hover:text-red-200 self-start sm:self-auto disabled:opacity-60">{deleting ? 'Deleting…' : 'Delete asset'}</button>
       </div>
     </div>
   )
