@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      checkout_locks: {
+        Row: {
+          acquired_at: string
+          expires_at: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          expires_at: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          expires_at?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       interviews: {
         Row: {
           created_at: string
@@ -203,6 +224,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acquire_checkout_lock: {
+        Args: { p_lease_seconds: number; p_token: string; p_user_id: string }
+        Returns: boolean
+      }
+      checkout_lock_lease: {
+        Args: { p_lease_seconds: number }
+        Returns: unknown
+      }
+      claim_stripe_customer: {
+        Args: { p_customer_id: string; p_user_id: string }
+        Returns: {
+          claimed: boolean
+          stored_customer_id: string
+        }[]
+      }
       hke_begin_asset_generation: {
         Args: {
           p_asset_type: string
@@ -270,7 +306,15 @@ export type Database = {
         Returns: string
       }
       release_build: { Args: { p_user_id: string }; Returns: undefined }
+      release_checkout_lock: {
+        Args: { p_token: string; p_user_id: string }
+        Returns: boolean
+      }
       release_generation: { Args: { p_user_id: string }; Returns: undefined }
+      renew_checkout_lock: {
+        Args: { p_lease_seconds: number; p_token: string; p_user_id: string }
+        Returns: boolean
+      }
       start_trial: { Args: never; Returns: undefined }
       try_consume_build: {
         Args: { p_user_id: string }

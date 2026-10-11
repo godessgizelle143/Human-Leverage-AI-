@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getStripeClient } from '@/lib/stripe/client'
-import { getSubscriptionPeriod } from '@/lib/stripe/period'
+import { supabaseBillingStore } from '@/lib/stripe/billing-store'
+import { STRIPE_REQUEST_LIMITS } from '@/lib/stripe/limits'
+import { syncSubscription, toRemoteSubscription, type SyncDeps } from '@/lib/stripe/sync'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 
-function mapStatus(
-  status: Stripe.Subscription.Status
-): 'active' | 'cancelled' | 'past_due' | 'trialing' {
-  if (status === 'active') return 'active'
-  if (status === 'trialing') return 'trialing'
-  if (status === 'past_due') return 'past_due'
-  return 'cancelled'
-}
+const SUBSCRIPTION_EVENTS = new Set<Stripe.Event['type']>([
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+])
 
 export async function POST(request: Request) {
   const stripe = getStripeClient()
@@ -47,172 +46,53 @@ export async function POST(request: Request) {
     )
   }
 
-  const supabase = createServiceRoleClient()
+  // The event only says which subscription to look at; its current state is
+  // always re-read from Stripe, so retries and out-of-order deliveries settle
+  // on the same result.
+  let target: { subscriptionId: string; userId?: string | null; plan?: unknown } | null = null
 
-  try {
-    if (event.type === 'checkout.session.completed') {
-      const session =
-        event.data.object as Stripe.Checkout.Session
-
-      const userId = session.metadata?.user_id
-      const plan = session.metadata?.plan
-
-      const subscriptionId =
-        typeof session.subscription === 'string'
-          ? session.subscription
-          : session.subscription?.id
-
-      const customerId =
-        typeof session.customer === 'string'
-          ? session.customer
-          : session.customer?.id
-
-      if (
-        userId &&
-        subscriptionId &&
-        customerId &&
-        (
-          plan === 'creator' ||
-          plan === 'professional' ||
-          plan === 'business'
-        )
-      ) {
-        const subscription =
-          await stripe.subscriptions.retrieve(subscriptionId)
-
-        const period = getSubscriptionPeriod(subscription)
-
-        if (!period) {
-          console.error(
-            'Subscription has no billing period data:',
-            subscription.id
-          )
-
-          return NextResponse.json(
-            { error: 'Subscription has no billing period data' },
-            { status: 500 }
-          )
-        }
-
-        const { error: upsertError } =
-          await supabase
-            .from('subscriptions')
-            .upsert(
-              {
-                user_id: userId,
-                stripe_customer_id: customerId,
-                stripe_subscription_id: subscription.id,
-                plan,
-                status: mapStatus(subscription.status),
-                interviews_used: 0,
-                builds_used: 0,
-                current_period_start: period.start,
-                current_period_end: period.end,
-                updated_at: new Date().toISOString()
-              },
-              { onConflict: 'user_id' }
-            )
-
-        if (upsertError) {
-          console.error(
-            'Subscription upsert failed:',
-            upsertError.message
-          )
-
-          return NextResponse.json(
-            { error: 'Database sync failed' },
-            { status: 500 }
-          )
-        }
-      }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session
+    const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id
+    if (session.mode === 'subscription' && subscriptionId) {
+      target = { subscriptionId, userId: session.metadata?.user_id, plan: session.metadata?.plan }
     }
-
-    if (
-      event.type === 'customer.subscription.updated' ||
-      event.type === 'customer.subscription.deleted'
-    ) {
-      const subscription =
-        event.data.object as Stripe.Subscription
-
-      const customerId =
-        typeof subscription.customer === 'string'
-          ? subscription.customer
-          : subscription.customer.id
-
-      const period = getSubscriptionPeriod(subscription)
-
-      if (!period) {
-        console.error(
-          'Subscription has no billing period data:',
-          subscription.id
-        )
-
-        return NextResponse.json(
-          { error: 'Subscription has no billing period data' },
-          { status: 500 }
-        )
-      }
-
-      const { data: existing } =
-        await supabase
-          .from('subscriptions')
-          .select('current_period_start')
-          .eq('stripe_customer_id', customerId)
-          .single()
-
-      const isNewPeriod =
-        existing?.current_period_start &&
-        existing.current_period_start !== period.start
-
-      const { error: updateError } =
-        await supabase
-          .from('subscriptions')
-          .update({
-            stripe_subscription_id: subscription.id,
-            status:
-              event.type === 'customer.subscription.deleted'
-                ? 'cancelled'
-                : mapStatus(subscription.status),
-            current_period_start: period.start,
-            current_period_end: period.end,
-            ...(isNewPeriod
-              ? {
-                  interviews_used: 0,
-                  builds_used: 0
-                }
-              : {}),
-            updated_at: new Date().toISOString()
-          })
-          .eq(
-            'stripe_customer_id',
-            customerId
-          )
-
-      if (updateError) {
-        console.error(
-          'Subscription update failed:',
-          updateError.message
-        )
-
-        return NextResponse.json(
-          { error: 'Database sync failed' },
-          { status: 500 }
-        )
-      }
-    }
-  } catch (error) {
-    console.error(
-      'Stripe webhook processing error:',
-      error
-    )
-
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    )
+  } else if (SUBSCRIPTION_EVENTS.has(event.type)) {
+    target = { subscriptionId: (event.data.object as Stripe.Subscription).id }
   }
 
-  return NextResponse.json({
-    received: true
-  })
+  if (!target) return NextResponse.json({ received: true })
+
+  const deps: SyncDeps = {
+    store: supabaseBillingStore(createServiceRoleClient()),
+    async retrieve(subscriptionId) {
+      try {
+        // Bounded so a slow Stripe ends in a 500 that Stripe redelivers, not a request that hangs.
+        return toRemoteSubscription(await stripe.subscriptions.retrieve(subscriptionId, STRIPE_REQUEST_LIMITS))
+      } catch (error) {
+        if (error instanceof Stripe.errors.StripeInvalidRequestError && error.code === 'resource_missing') return null
+        throw error
+      }
+    },
+  }
+
+  try {
+    const result = await syncSubscription(deps, target)
+
+    if (result.action === 'ignore' && result.reason === 'duplicate_live_subscription') {
+      // Two subscriptions are billing one account. Entitlement stays on the
+      // recorded one; which to cancel or refund is a human decision (both may
+      // have been paid, possibly for different plans), so nothing is changed in
+      // Stripe. The ids are also returned so they appear in Stripe's webhook log.
+      const report = { eventId: event.id, userId: result.userId, keptSubscriptionId: result.keptSubscriptionId, duplicateSubscriptionId: result.duplicateSubscriptionId }
+      console.error('DUPLICATE LIVE SUBSCRIPTION — manual review required:', JSON.stringify(report))
+      return NextResponse.json({ received: true, action: 'ignore', reason: result.reason, ...report })
+    }
+
+    return NextResponse.json({ received: true, action: result.action, ...(result.action === 'ignore' ? { reason: result.reason } : {}) })
+  } catch (error) {
+    // Any failure leaves the stored row untouched; 500 makes Stripe retry.
+    console.error('Stripe webhook processing error:', event.id, error instanceof Error ? error.message : 'Unknown error')
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })
+  }
 }

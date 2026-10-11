@@ -41,13 +41,18 @@ beforeAll(async () => {
 })
 
 describe('types/database.ts matches the migrated schema', () => {
-  it.each(['interviews', 'projects', 'project_assets', 'subscriptions'])('%s columns', async (table) => {
+  it.each(['checkout_locks', 'interviews', 'projects', 'project_assets', 'subscriptions'])('%s columns', async (table) => {
     await t.asSuperuser()
     const rows = await t.query<{ column_name: string }>(`select column_name from information_schema.columns where table_schema = 'public' and table_name = $1`, [table])
     expect(typedColumns(table)).toEqual(rows.map((row) => row.column_name).sort())
   })
 
   it.each([
+    'acquire_checkout_lock',
+    'checkout_lock_lease',
+    'claim_stripe_customer',
+    'renew_checkout_lock',
+    'release_checkout_lock',
     'hke_begin_asset_generation',
     'hke_begin_blueprint_generation',
     'hke_expire_stale_asset_generations',
