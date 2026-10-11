@@ -20,6 +20,9 @@ export async function generateStructured<Schema extends z.ZodType>(
     if (error instanceof IntelligenceError && error.failure === 'rate_limited') {
       throw new HkeError('ai_rate_limited', 'The AI service has reached its usage limit. Please try again later.')
     }
+    if (error instanceof IntelligenceError && error.failure === 'timeout') {
+      throw new HkeError('ai_timeout', 'The AI took too long to respond, so this attempt was stopped. Please try again.')
+    }
     throw new HkeError('ai_unavailable', 'The AI service is temporarily unavailable. Please try again.')
   }
 

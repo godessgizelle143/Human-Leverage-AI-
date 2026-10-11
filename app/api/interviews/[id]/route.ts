@@ -9,6 +9,7 @@ import {
   serializeInterviewMessages,
   titleFromAnswers,
 } from '@/lib/hke/interview'
+import { lockingProject } from '@/lib/hke/generation/recovery'
 
 async function loadInterview(id: string) {
   const auth = await requireUser()
@@ -26,12 +27,14 @@ async function loadInterview(id: string) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id')
+    .select('id, status, updated_at')
     .eq('interview_id', id)
     .eq('user_id', user.id)
     .maybeSingle()
 
-  return { supabase, user, interview, projectId: project?.id ?? null } as const
+  // A blueprint build that was cut off must not lock the interview for good:
+  // once it is stale the customer can save and request the build again.
+  return { supabase, user, interview, projectId: lockingProject(project)?.id ?? null } as const
 }
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {

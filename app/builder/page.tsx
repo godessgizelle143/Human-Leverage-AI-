@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { lockingProject } from '@/lib/hke/generation/recovery'
 import { parseInterviewMessages } from '@/lib/hke/interview'
 import { isUuid } from '@/lib/hke/server'
 import AppHeader from '@/components/hke/AppHeader'
@@ -25,8 +26,11 @@ export default async function BuilderPage({ searchParams }: { searchParams: { in
       .maybeSingle()
     if (!interview) redirect('/dashboard')
 
-    const { data: project } = await supabase.from('projects').select('id').eq('interview_id', interviewId).eq('user_id', user.id).maybeSingle()
-    if (project) redirect(`/projects/${project.id}`)
+    const { data: project } = await supabase.from('projects').select('id, status, updated_at').eq('interview_id', interviewId).eq('user_id', user.id).maybeSingle()
+    // A finished project, or a build that may still be running, owns this
+    // interview. A build that was cut off does not, so it can be started again.
+    const locking = lockingProject(project)
+    if (locking) redirect(`/projects/${locking.id}`)
 
     initial = parseInterviewMessages(interview.messages)
     updatedAt = interview.updated_at

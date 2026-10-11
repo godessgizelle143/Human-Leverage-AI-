@@ -18,6 +18,7 @@ export type HkeErrorCode =
   | 'not_configured'
   | 'ai_unavailable'
   | 'ai_rate_limited'
+  | 'ai_timeout'
   | 'ai_malformed_output'
   | 'database_error'
   | 'internal'
@@ -35,6 +36,7 @@ const STATUS: Record<HkeErrorCode, number> = {
   not_configured: 503,
   ai_unavailable: 502,
   ai_rate_limited: 429,
+  ai_timeout: 504,
   ai_malformed_output: 502,
   database_error: 500,
   internal: 500,

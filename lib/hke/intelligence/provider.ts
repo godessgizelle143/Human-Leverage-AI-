@@ -1,3 +1,4 @@
+import { APIConnectionTimeoutError } from 'openai'
 import { getOpenAIClient } from '@/lib/openai/client'
 
 /**
@@ -19,7 +20,7 @@ export type JsonCompletion = {
   model: string
 }
 
-export type IntelligenceFailure = 'rate_limited' | 'unavailable'
+export type IntelligenceFailure = 'rate_limited' | 'timeout' | 'unavailable'
 
 export class IntelligenceError extends Error {
   readonly failure: IntelligenceFailure
@@ -54,6 +55,11 @@ export const openAIProvider: IntelligenceProvider = {
       const choice = completion.choices[0]
       return { text: choice?.message?.content ?? '', truncated: choice?.finish_reason === 'length', model: completion.model || model }
     } catch (error) {
+      // The client's own time limit (lib/openai/client.ts) was reached.
+      if (error instanceof APIConnectionTimeoutError) {
+        console.error('AI provider request failed:', 'timeout')
+        throw new IntelligenceError('timeout', 'The AI service took too long to respond.')
+      }
       const status = typeof error === 'object' && error !== null && 'status' in error ? Number((error as { status: unknown }).status) : 0
       // Only the status is logged; provider messages can echo request content.
       console.error('AI provider request failed:', status || 'network')

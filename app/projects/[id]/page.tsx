@@ -6,6 +6,7 @@ import { HLAI_CAPABILITIES } from '@/lib/ai/capabilities'
 import { getUserUsage } from '@/lib/hke/access'
 import { blueprintEntries, stepEntries } from '@/lib/hke/blueprint'
 import { canGenerateAsset } from '@/lib/hke/entitlements'
+import { isStaleBlueprintBuild } from '@/lib/hke/generation/recovery'
 import { answeredCount, parseInterviewMessages, TOTAL_QUESTIONS } from '@/lib/hke/interview'
 import { assembleKnowledge } from '@/lib/hke/knowledge'
 import { deriveLifecycle } from '@/lib/hke/lifecycle'
@@ -42,6 +43,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
   const stage = deriveLifecycle(interview, project, assets)
   const archived = !!project.archived_at
   const building = project.status !== 'completed'
+  const interrupted = isStaleBlueprintBuild(project)
   const knowledge = assembleKnowledge(project, answers)
   const blueprint = blueprintEntries(project.content)
 
@@ -81,12 +83,23 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
 
         {building ? (
           <div className="mt-8 rounded-2xl border border-brand-pink/30 bg-brand-pink/5 p-6">
-            <p className="font-semibold">HKE AI is extracting your knowledge into a blueprint…</p>
-            <p className="mt-2 text-sm text-white/60">This usually takes under a minute. If it was interrupted, your credits are refunded automatically and you can build again from the interview.</p>
-            <div className="mt-4 flex flex-wrap gap-4">
-              <RefreshButton />
-              <Link href={`/builder?interview=${project.interview_id}`} className="text-sm text-white/60 hover:text-white">Back to interview</Link>
-            </div>
+            {interrupted ? (
+              <>
+                <p className="font-semibold">This blueprint build was interrupted before it finished.</p>
+                <p className="mt-2 text-sm text-white/60">Your interview answers are saved. Build again from the interview; the credits held by the interrupted build are returned when the new build starts.</p>
+                <div className="mt-4 flex flex-wrap gap-4">
+                  <Link href={`/builder?interview=${project.interview_id}`} className="btn-primary justify-center">Build again from the interview →</Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold">HKE AI is extracting your knowledge into a blueprint…</p>
+                <p className="mt-2 text-sm text-white/60">This usually takes under a minute. If it has not finished after five minutes, refresh this page and you can build again from the interview.</p>
+                <div className="mt-4 flex flex-wrap gap-4">
+                  <RefreshButton />
+                </div>
+              </>
+            )}
           </div>
         ) : (
           <>

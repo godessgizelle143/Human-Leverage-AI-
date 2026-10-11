@@ -40,6 +40,8 @@ All credit movement happens inside database functions (`supabase/migrations/2026
 2. The server calls the model and validates the output with Zod.
 3. `hke_finish_*` settles the claim exactly once: success → `consumed`; failure → credits released, `released`.
 4. A claim left `generating` for 5+ minutes (killed function) is settled and refunded by the next attempt on the same interview or project.
+5. Every model request goes through one client (`lib/openai/client.ts`) limited to 45 seconds with no SDK retries, against the 60-second limit of both generation routes, so a slow request fails inside the route (`ai_timeout`, HTTP 504) and step 3 records it and returns the credits. The SDK defaults (10 minutes, 2 retries) would outlast the route.
+6. If a blueprint build is cut off anyway, its project stays `generating`. While that is under five minutes old it still owns the interview; after that `lib/hke/generation/recovery.ts` stops treating it as locking, so the builder opens the interview again and the next build request triggers step 4. A completed project always locks its interview.
 
 The owner bypass (`HUMAN_LEVERAGE_OWNER_EMAILS`) passes `p_skip_entitlement`, so no credits move (`entitlement_state = 'none'`).
 
