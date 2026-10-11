@@ -25,8 +25,11 @@ export default function ForgotPasswordPage() {
 
     try {
       const supabase = createClient()
+      // The link returns to the same callback as sign-up confirmation and
+      // Google sign-in. It completes the link on the server and then opens
+      // /reset-password.
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/api/auth/callback`,
       })
 
       // Supabase does not report whether the address has an account, so any

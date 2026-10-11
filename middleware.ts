@@ -48,6 +48,15 @@ export async function middleware(request: NextRequest) {
   // Do not redirect authenticated users away from `/` so the public entry
   // point remains testable and shareable.
   if (pathname === '/') {
+    // Supabase sends an email link to the site's root when the link's own
+    // return address is not on the project's allow-list. The one-time code or
+    // token is still valid, so pass it to the callback instead of dropping it.
+    const { searchParams } = request.nextUrl
+    if (searchParams.has('code') || searchParams.has('token_hash')) {
+      const callback = request.nextUrl.clone()
+      callback.pathname = '/api/auth/callback'
+      return NextResponse.redirect(callback)
+    }
     return response
   }
 

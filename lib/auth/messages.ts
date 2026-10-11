@@ -8,7 +8,7 @@ export const AUTH_ERROR_MESSAGES = {
   'oauth-cancelled': 'Google sign-in was cancelled. Choose an option below to continue.',
   'oauth-failed': 'We could not complete sign-in with Google. Please try again.',
   'link-invalid':
-    'This sign-in link is invalid, has expired, or was opened in a different browser. If you just confirmed your email, sign in with your password below.',
+    'This link is invalid, has expired, or was opened in a different browser. If you just confirmed your email, sign in with your password below. If you were resetting your password, use "Forgot password?" to request a new link.',
   'missing-code': 'That sign-in link is incomplete. Please sign in below or request a new link.',
   'session-failed': 'We could not start your session. Please sign in again.',
 } as const

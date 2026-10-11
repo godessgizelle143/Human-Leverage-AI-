@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { completeAuthCallback } from '@/lib/auth/callback'
 import { AUTH_ERROR_MESSAGES, authErrorMessage, dashboardNotice } from '@/lib/auth/messages'
 
-type Result = { error: { message: string } | null }
+type Result = { error: { message: string } | null; data?: { redirectType?: string | null } }
 
 function client(options: { exchange?: Result; verify?: Result; user?: { id: string } | null; trial?: Result } = {}) {
   return {
@@ -39,11 +39,40 @@ describe('completeAuthCallback', () => {
     expect(supabase.auth.verifyOtp).toHaveBeenCalledWith({ token_hash: 'th', type: 'signup' })
   })
 
-  it('refuses recovery links, which belong to the reset-password page', async () => {
+  // Password-reset links used to be refused here and left to the reset page's
+  // own browser-side handling, which is what broke the reset journey. They are
+  // now completed here and reported as a recovery.
+  it('completes a token-hash password-reset link as a recovery, without starting a trial', async () => {
     const supabase = client()
-    await expect(run(supabase, 'token_hash=th&type=recovery')).resolves.toEqual({ ok: false, error: 'missing-code' })
-    expect(supabase.auth.verifyOtp).not.toHaveBeenCalled()
+    await expect(run(supabase, 'token_hash=th&type=recovery')).resolves.toEqual({ ok: true, recovery: { userId: 'user-1' } })
+    expect(supabase.auth.verifyOtp).toHaveBeenCalledWith({ token_hash: 'th', type: 'recovery' })
     expect(supabase.rpc).not.toHaveBeenCalled()
+  })
+
+  it('recognises a PKCE password-reset link from the stored verifier, not from the URL', async () => {
+    const supabase = client({ exchange: { error: null, data: { redirectType: 'recovery' } } })
+    await expect(run(supabase, 'code=abc')).resolves.toEqual({ ok: true, recovery: { userId: 'user-1' } })
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc')
+    expect(supabase.rpc).not.toHaveBeenCalled()
+  })
+
+  it('does not treat an ordinary sign-in link as a recovery, whatever the URL claims', async () => {
+    const supabase = client({ exchange: { error: null, data: { redirectType: null } } })
+    await expect(run(supabase, 'code=abc&type=recovery&recovery=1')).resolves.toEqual({ ok: true })
+    expect(supabase.rpc).toHaveBeenCalledWith('start_trial')
+  })
+
+  it('reports a failed password-reset link as a failed recovery', async () => {
+    const supabase = client({ verify: { error: { message: 'Email link is invalid or has expired' } } })
+    vi.spyOn(console, 'error').mockImplementationOnce(() => {})
+    await expect(run(supabase, 'token_hash=th&type=recovery')).resolves.toEqual({ ok: false, error: 'link-invalid', recovery: true })
+    expect(supabase.rpc).not.toHaveBeenCalled()
+  })
+
+  it('reports an expired email link as an invalid link, not as a Google sign-in problem', async () => {
+    const supabase = client()
+    await expect(run(supabase, 'error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired')).resolves.toEqual({ ok: false, error: 'link-invalid' })
+    expect(supabase.auth.exchangeCodeForSession).not.toHaveBeenCalled()
   })
 
   it('maps a cancelled Google consent to a fixed code', async () => {
