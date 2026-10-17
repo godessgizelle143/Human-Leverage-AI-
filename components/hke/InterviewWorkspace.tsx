@@ -4,9 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import clsx from 'clsx'
-import { INTERVIEW_QUESTIONS } from '@/types/interview'
+import { INTERVIEW_QUESTIONS, type InterviewQuestion } from '@/types/interview'
 import { createClient } from '@/lib/supabase/client'
 import { answeredCount, progressFor, TOTAL_QUESTIONS, type InterviewAnswers } from '@/lib/hke/interview'
+import { buildJourney } from '@/lib/hke/journey'
+import JourneyRail from './JourneyRail'
 import { ProgressMeter } from './LifecycleBadge'
 
 type SaveState = 'idle' | 'pending' | 'saving' | 'saved' | 'error'
@@ -14,6 +16,7 @@ type Backup = { answers: InterviewAnswers; current: number; savedAt: number }
 
 const LEGACY_DRAFT_KEY = 'human-leverage-builder-draft-v1'
 const AUTOSAVE_DELAY_MS = 1200
+const CATEGORY_LABELS: Record<InterviewQuestion['category'], string> = { basics: 'The basics', audience: 'Your customer', brand: 'Your brand', content: 'Proof & results', goals: 'Goals & channels' }
 const backupKey = (id: string | null) => `hke-interview-backup:${id ?? 'new'}`
 
 function readBackup(key: string): Backup | null {
@@ -256,79 +259,123 @@ export default function InterviewWorkspace(props: InterviewWorkspaceProps) {
     error: 'Not saved — retrying',
   }[saveState]
 
+  const journey = buildJourney({ answered, interviewId, blueprint: 'none' })
+  const remaining = TOTAL_QUESTIONS - answered
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <p className="text-brand-gold text-sm font-semibold mb-1">KNOWLEDGE INTERVIEW</p>
-          <h1 className="text-2xl sm:text-3xl font-bold truncate">{answers['1']?.trim() || 'New HKE AI Project'}</h1>
+          <p className="eyebrow mb-1">Stage 1 of 5 · Capture</p>
+          <h1 className="text-3xl font-black tracking-tight truncate sm:text-4xl">{answers['1']?.trim() || 'New HKE AI Project'}</h1>
         </div>
         <div className="flex items-center gap-4 text-sm">
-          <span className={clsx(saveState === 'error' ? 'text-red-300' : 'text-white/50')} aria-live="polite">{saveLabel}</span>
-          <button type="button" onClick={saveAndExit} className="text-white/70 hover:text-white">Save &amp; exit</button>
+          <span className={clsx('inline-flex items-center gap-2', saveState === 'error' ? 'text-red-300' : 'text-white/50')} aria-live="polite">{saveState === 'saved' && <span className="status-dot" aria-hidden />}{saveLabel}</span>
+          <button type="button" onClick={saveAndExit} className="link-quiet">Save &amp; exit</button>
         </div>
       </div>
 
-      {props.archived && <div className="mb-4 rounded-xl border border-white/15 bg-white/5 p-3 text-sm text-white/60">This project is archived. You can still edit it, or restore it from your dashboard.</div>}
-      {notice && <div className="mb-4 rounded-xl border border-brand-gold/30 bg-brand-gold/10 p-3 text-sm text-brand-gold">{notice}</div>}
+      {props.archived && <div className="notice mb-4">This project is archived. You can still edit it, or restore it from your dashboard.</div>}
+      {notice && <div role="status" className="notice notice-gold mb-4">{notice}</div>}
 
-      <div className="glass rounded-2xl p-5 sm:p-8">
-        <ProgressMeter value={progress} label={`${answered} of ${TOTAL_QUESTIONS} questions answered`} />
+      <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <aside className="hidden lg:block">
+          <div className="glass sticky top-24 rounded-2xl p-4">
+            <div className="px-1"><ProgressMeter value={progress} label={`${answered} of ${TOTAL_QUESTIONS} answered`} /></div>
+            <nav className="mt-4" aria-label="Interview questions">
+              <ol className="space-y-0.5">
+                {INTERVIEW_QUESTIONS.map((item, index) => {
+                  const filled = !!answers[String(item.id)]?.trim()
+                  const active = index === current
+                  return (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => goTo(index)}
+                        aria-current={active ? 'step' : undefined}
+                        aria-label={`Question ${index + 1}${filled ? ', answered' : ''}: ${item.question}`}
+                        className={clsx('flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition', active ? 'bg-brand-pink/10 text-white' : 'text-white/55 hover:bg-white/5 hover:text-white')}
+                      >
+                        <span className={clsx('grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-bold', active ? 'bg-brand-pink text-brand-black' : filled ? 'bg-brand-gold text-brand-black' : 'border border-white/20 text-white/45')}>{filled && !active ? '✓' : index + 1}</span>
+                        <span className="min-w-0 truncate text-[13px]">{item.question}</span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ol>
+            </nav>
+          </div>
+        </aside>
 
-        <nav className="mt-5 flex flex-wrap gap-1.5" aria-label="Interview questions">
-          {INTERVIEW_QUESTIONS.map((item, index) => {
-            const filled = !!answers[String(item.id)]?.trim()
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => goTo(index)}
-                aria-current={index === current ? 'step' : undefined}
-                aria-label={`Question ${index + 1}${filled ? ', answered' : ''}`}
-                className={clsx(
-                  'h-8 w-8 rounded-lg text-xs font-semibold transition',
-                  index === current ? 'bg-gradient-brand text-brand-black' : filled ? 'bg-brand-gold/15 text-brand-gold border border-brand-gold/30' : 'border border-white/10 text-white/40 hover:text-white',
-                )}
-              >
-                {index + 1}
-              </button>
-            )
-          })}
-        </nav>
+        <div className="min-w-0">
+          <div className="glass rounded-2xl p-5 sm:p-8">
+            <div className="lg:hidden">
+              <ProgressMeter value={progress} label={`${answered} of ${TOTAL_QUESTIONS} questions answered`} />
+              <nav className="mt-5 flex flex-wrap gap-1.5" aria-label="Interview questions">
+                {INTERVIEW_QUESTIONS.map((item, index) => {
+                  const filled = !!answers[String(item.id)]?.trim()
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => goTo(index)}
+                      aria-current={index === current ? 'step' : undefined}
+                      aria-label={`Question ${index + 1}${filled ? ', answered' : ''}`}
+                      className={clsx(
+                        'h-8 w-8 rounded-lg text-xs font-semibold transition',
+                        index === current ? 'bg-brand-pink text-brand-black' : filled ? 'bg-brand-gold/15 text-brand-gold border border-brand-gold/30' : 'border border-white/10 text-white/40 hover:text-white',
+                      )}
+                    >
+                      {index + 1}
+                    </button>
+                  )
+                })}
+              </nav>
+            </div>
 
-        <div className="mt-8">
-          <p className="text-brand-pink text-xs font-semibold uppercase tracking-wider mb-2">Question {current + 1} of {TOTAL_QUESTIONS} · {question.category}</p>
-          <h2 className="text-xl sm:text-2xl font-semibold mb-5">{question.question}</h2>
-          <textarea
-            value={answers[String(question.id)] ?? ''}
-            onChange={(event) => updateAnswer(event.target.value)}
-            onBlur={() => { if (dirtyRef.current) void persist() }}
-            rows={7}
-            maxLength={10000}
-            className="w-full rounded-xl bg-white/5 border border-white/10 p-4 text-white placeholder:text-white/30 outline-none focus:border-brand-gold"
-            placeholder="Tell HKE AI in your own words… You can skip a question and come back later."
-            autoFocus
-          />
+            <div className="mt-8 lg:mt-0">
+              <p className="eyebrow eyebrow-pink mb-3">Question {current + 1} of {TOTAL_QUESTIONS} · {CATEGORY_LABELS[question.category]}</p>
+              <label htmlFor="interview-answer" className="mb-6 block text-2xl font-bold leading-snug sm:text-3xl">{question.question}</label>
+              <textarea
+                id="interview-answer"
+                key={question.id}
+                value={answers[String(question.id)] ?? ''}
+                onChange={(event) => updateAnswer(event.target.value)}
+                onBlur={() => { if (dirtyRef.current) void persist() }}
+                rows={9}
+                maxLength={10000}
+                className="field text-base leading-7"
+                placeholder="Tell HKE AI in your own words… You can skip a question and come back later."
+                autoFocus
+              />
+            </div>
+
+            {error && <div role="alert" className="notice notice-error mt-4">{error}</div>}
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+              <button type="button" onClick={() => goTo(current - 1)} disabled={current === 0 || building} className="btn-secondary justify-center disabled:opacity-40">Back</button>
+              {isLast ? (
+                <button type="button" onClick={buildBlueprint} disabled={building} className="btn-primary justify-center disabled:opacity-60">
+                  {building ? 'Extracting knowledge & building…' : 'Build My Blueprint →'}
+                </button>
+              ) : (
+                <button type="button" onClick={() => goTo(current + 1)} className="btn-primary justify-center">Next Question →</button>
+              )}
+            </div>
+            {isLast && answered < TOTAL_QUESTIONS && (
+              <p className="mt-4 text-sm text-white/50">{remaining} question{remaining === 1 ? '' : 's'} still unanswered. HKE AI works best with all {TOTAL_QUESTIONS}, but you can build now.</p>
+            )}
+          </div>
+
+          <section className="surface-inset mt-6 rounded-2xl p-5 sm:p-6" aria-label="What happens after the interview">
+            <p className="text-xs font-semibold uppercase tracking-wider text-white/45">Where this goes next</p>
+            <JourneyRail stages={journey} compact className="mt-4" />
+            <p className="mt-4 text-sm leading-6 text-white/55">Your answers are the only source HKE AI builds from. When you build your blueprint, they are structured into a plan, then into assets you can edit and export.</p>
+          </section>
+
+          <p className="mt-6 text-center text-sm text-white/40">Your answers save to your account automatically. Leave any time and continue from <Link href="/dashboard" className="link-action">your dashboard</Link>.</p>
         </div>
-
-        {error && <div className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-200">{error}</div>}
-
-        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-          <button type="button" onClick={() => goTo(current - 1)} disabled={current === 0 || building} className="btn-secondary justify-center disabled:opacity-40">Back</button>
-          {isLast ? (
-            <button type="button" onClick={buildBlueprint} disabled={building} className="btn-primary justify-center disabled:opacity-60">
-              {building ? 'Extracting knowledge & building…' : 'Build My Blueprint →'}
-            </button>
-          ) : (
-            <button type="button" onClick={() => goTo(current + 1)} className="btn-primary justify-center">Next Question →</button>
-          )}
-        </div>
-        {isLast && answered < TOTAL_QUESTIONS && (
-          <p className="mt-4 text-sm text-white/50">{TOTAL_QUESTIONS - answered} question{TOTAL_QUESTIONS - answered === 1 ? '' : 's'} still unanswered. HKE AI works best with all {TOTAL_QUESTIONS}, but you can build now.</p>
-        )}
       </div>
-
-      <p className="text-center text-white/40 text-sm mt-6">Your answers save to your account automatically. Leave any time and continue from <Link href="/dashboard" className="text-brand-gold hover:underline">your dashboard</Link>.</p>
     </div>
   )
 }

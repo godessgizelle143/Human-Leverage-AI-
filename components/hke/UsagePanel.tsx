@@ -24,7 +24,7 @@ export default function UsagePanel({ usage, compact = false }: { usage: Usage | 
   const periodEnd = usage.periodEnd ? new Date(usage.periodEnd) : null
 
   return (
-    <section className={compact ? 'rounded-xl border border-white/10 bg-white/[.03] p-4' : 'glass rounded-2xl p-6'}>
+    <section className={compact ? 'surface-inset rounded-xl p-4' : 'glass rounded-2xl p-6'}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className={compact ? 'text-sm font-semibold' : 'text-xl font-semibold'}>Generation capacity</h2>

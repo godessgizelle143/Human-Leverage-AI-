@@ -1,7 +1,12 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { isDemoMode } from '@/lib/demo/mode'
+import { createDemoSupabaseClient } from '@/lib/demo/supabase'
 
 export async function createServerSupabaseClient() {
+  // Local demo preview only (never in a production build): read-only sample data.
+  if (isDemoMode()) return createDemoSupabaseClient() as never
+
   const cookieStore = await cookies()
 
   return createServerClient(
@@ -34,6 +39,8 @@ export async function createServerSupabaseClient() {
 }
 
 export function createServiceRoleClient() {
+  if (isDemoMode()) return createDemoSupabaseClient()
+
   const { createClient } = require('@supabase/supabase-js')
 
   return createClient(

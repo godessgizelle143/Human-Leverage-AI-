@@ -20,7 +20,7 @@ export const ASSET_TYPES = [
   { id: 'ebook', label: 'Ebook Outline & Opening', category: 'education', description: 'Chapter outline plus a drafted introduction.', instructions: 'Create an ebook: title, subtitle, a chapter outline (6-10 chapters, each with 2-3 bullet points), then a fully drafted Introduction of 500-700 words.' },
   { id: 'workbook', label: 'Workbook', category: 'education', description: 'Exercises and prompts that apply your method.', instructions: 'Create a workbook with a title, a short how-to-use section, and 5-7 modules. Each module has a short explanation, 3-5 reflection prompts, and one action exercise.' },
   { id: 'course', label: 'Course Outline', category: 'education', description: 'Modules, lessons, and outcomes for a course.', instructions: 'Create a course outline: course title, promise, who it is for, 5-8 modules each with 3-5 lesson titles and one learning outcome, plus suggested bonuses.' },
-  { id: 'one_pager', label: 'One-Page Overview (PDF)', category: 'document', description: 'A print-ready business overview to share or attach.', instructions: 'Write a one-page business overview designed to be printed or saved as PDF: business name as the title, a one-paragraph summary, Who We Serve, What We Offer (bulleted), Why Us (bulleted), How To Get Started, and contact [placeholders]. Keep it under 450 words.' },
+  { id: 'one_pager', label: 'One-Page Overview (print-ready)', category: 'document', description: 'A print-ready business overview to share or attach.', instructions: 'Write a one-page business overview designed to be printed or saved as PDF: business name as the title, a one-paragraph summary, Who We Serve, What We Offer (bulleted), Why Us (bulleted), How To Get Started, and contact [placeholders]. Keep it under 450 words.' },
 ] as const satisfies readonly AssetTypeDefinition[]
 
 export type AssetTypeId = (typeof ASSET_TYPES)[number]['id']
@@ -62,3 +62,14 @@ export function displayStatus(asset: Pick<ProjectAssetRow, 'status' | 'updated_a
 
 /** The asset fields the UI needs (no ownership or accounting columns). */
 export type AssetSummary = Pick<ProjectAssetRow, 'id' | 'project_id' | 'asset_type' | 'title' | 'status' | 'version' | 'error_message' | 'created_at' | 'updated_at'>
+
+/**
+ * The asset list a page shows: the server's list, which is authoritative and
+ * changes on every refresh, plus assets this page just generated that a
+ * refresh has not returned yet. Server rows win, so a status change (finished,
+ * failed, interrupted) always shows.
+ */
+export function mergeAssetLists<T extends Pick<AssetSummary, 'id'>>(server: readonly T[], created: readonly T[]): T[] {
+  const known = new Set(server.map((asset) => asset.id))
+  return [...created.filter((asset) => !known.has(asset.id)), ...server]
+}

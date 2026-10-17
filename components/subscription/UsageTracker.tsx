@@ -26,7 +26,7 @@ export default function UsageTracker({ label, used, total, resetDate }: UsageTra
       <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            percentage > 80 ? 'bg-red-500' : percentage > 50 ? 'bg-brand-gold' : 'bg-green-400'
+            percentage > 80 ? 'bg-red-500' : percentage > 50 ? 'bg-brand-gold' : 'bg-brand-turquoise'
           }`}
           style={{ width: `${percentage}%` }}
         />

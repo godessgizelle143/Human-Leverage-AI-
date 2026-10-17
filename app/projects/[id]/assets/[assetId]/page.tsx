@@ -16,13 +16,14 @@ export default async function AssetPage({ params }: { params: { id: string; asse
 
   const project = await loadOwnedProject(supabase, user.id, params.id)
   if (!project) redirect('/dashboard')
-  const { data: asset } = await supabase
+  const { data: asset, error } = await supabase
     .from('project_assets')
     .select('id, asset_type, title, content, version, status')
     .eq('id', params.assetId)
     .eq('project_id', project.id)
     .eq('user_id', user.id)
     .maybeSingle()
+  if (error) throw new Error('This asset could not be loaded.')
   if (!asset || asset.status !== 'completed') redirect(`/projects/${project.id}#assets`)
 
   return (

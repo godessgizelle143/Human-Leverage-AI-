@@ -1,105 +1,45 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import StepShell, { StepFormAlert } from '@/components/hke/StepShell'
+import { useStepForm } from '@/components/hke/useStepForm'
 
 export default function LaunchTargetPage() {
-  const router = useRouter()
-  const [audience, setAudience] = useState('')
-  const [location, setLocation] = useState('')
-  const [offer, setOffer] = useState('')
-  const [milestone, setMilestone] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const projectId = window.location.pathname.split('/')[2]
-
-    async function loadSavedLaunchTarget() {
-      try {
-        const response = await fetch(`/api/projects/${projectId}/launch-target`)
-        if (!response.ok) throw new Error('Unable to load launch target.')
-        const data = await response.json()
-        const saved = data.launchTarget
-        if (saved) {
-          setAudience(typeof saved.audience === 'string' ? saved.audience : '')
-          setLocation(typeof saved.location === 'string' ? saved.location : '')
-          setOffer(typeof saved.offer === 'string' ? saved.offer : '')
-          setMilestone(typeof saved.first_milestone === 'string' ? saved.first_milestone : '')
-        }
-      } catch {
-        alert('Unable to load your saved launch target. Please try again.')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadSavedLaunchTarget()
-  }, [])
-
-  async function saveLaunchTarget(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setSaving(true)
-    try {
-      const response = await fetch(`/api/projects/${window.location.pathname.split('/')[2]}/launch-target`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audience, location, offer, milestone }),
-      })
-      if (!response.ok) throw new Error('Unable to save launch target.')
-      router.push(window.location.pathname.replace('/launch-target', ''))
-      router.refresh()
-    } catch {
-      setSaving(false)
-      alert('Unable to save your launch target. Please try again.')
-    }
-  }
+  const { values, set, status, error, retry, submit, locked } = useStepForm('launch_target')
 
   return (
-    <main className="min-h-screen bg-brand-black text-white px-6 py-10">
-      <div className="max-w-3xl mx-auto">
-        <button type="button" onClick={() => router.back()} className="text-white/60 hover:text-white mb-8">
-          ← Back to blueprint
-        </button>
-        <p className="text-brand-gold text-sm font-semibold uppercase">Step 01</p>
-        <h1 className="text-3xl md:text-4xl font-bold mt-2">Define your launch target</h1>
-        <p className="text-white/60 leading-7 mt-3 mb-8">
-          Turn your blueprint into a specific launch target. HKE AI
-          will use this information to guide the next steps without making you
-          repeat your original interview.
-        </p>
-        <form onSubmit={saveLaunchTarget} className="space-y-6">
-          <fieldset disabled={loading || saving} className="space-y-6">
+    <StepShell step={1} title="Define your launch target" description={<>Turn your blueprint into a specific launch target. HKE AI will use this information to guide the next steps without making you repeat your original interview.</>}>
+        <form onSubmit={submit} className="space-y-6">
+          <StepFormAlert status={status} error={error} onRetry={retry} />
+          <fieldset disabled={locked} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold mb-2">Who are you serving?</label>
-              <textarea value={audience} onChange={(event) => setAudience(event.target.value)} required rows={4}
-                className="w-full rounded-xl bg-white/5 border border-white/10 p-4 text-white placeholder:text-white/30 outline-none focus:border-brand-gold"
+              <label className="field-label">Who are you serving?</label>
+              <textarea value={values.audience} onChange={(event) => set('audience', event.target.value)} required rows={4}
+                className="field"
                 placeholder="Describe the specific customer you want to reach first." />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Where are you launching?</label>
-              <input value={location} onChange={(event) => setLocation(event.target.value)} required
-                className="w-full rounded-xl bg-white/5 border border-white/10 p-4 text-white placeholder:text-white/30 outline-none focus:border-brand-gold"
+              <label className="field-label">Where are you launching?</label>
+              <input value={values.location} onChange={(event) => set('location', event.target.value)} required
+                className="field"
                 placeholder="City, region, or service area" />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">What are you offering first?</label>
-              <textarea value={offer} onChange={(event) => setOffer(event.target.value)} required rows={4}
-                className="w-full rounded-xl bg-white/5 border border-white/10 p-4 text-white placeholder:text-white/30 outline-none focus:border-brand-gold"
+              <label className="field-label">What are you offering first?</label>
+              <textarea value={values.offer} onChange={(event) => set('offer', event.target.value)} required rows={4}
+                className="field"
                 placeholder="Describe the first service or product customers can actually buy." />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">What is your first milestone?</label>
-              <input value={milestone} onChange={(event) => setMilestone(event.target.value)} required
-                className="w-full rounded-xl bg-white/5 border border-white/10 p-4 text-white placeholder:text-white/30 outline-none focus:border-brand-gold"
-                placeholder="For example: complete the first 10 paid orders" />
+              <label className="field-label">What is your first milestone?</label>
+              <input value={values.milestone} onChange={(event) => set('milestone', event.target.value)} required
+                className="field"
+                placeholder="For example: sign the first 10 paying customers" />
             </div>
             <button type="submit" className="btn-primary disabled:opacity-60">
-              {loading ? 'Loading saved answers…' : saving ? 'Saving…' : 'Save Launch Target →'}
+              {status === 'loading' ? 'Loading saved answers…' : status === 'load-error' ? 'Saved answers not loaded' : status === 'saving' ? 'Saving…' : 'Save Launch Target →'}
             </button>
           </fieldset>
         </form>
-      </div>
-    </main>
+    </StepShell>
   )
 }

@@ -43,11 +43,11 @@ export default function UsageStats() {
         color="bg-brand-pink/10"
       />
       <StatCard
-        icon={<Calendar className="w-5 h-5 text-blue-400" />}
+        icon={<Calendar className="w-5 h-5 text-brand-turquoise" />}
         label="Reset Date"
         value="Feb 15"
         subtext="15 days until refresh"
-        color="bg-blue-400/10"
+        color="bg-brand-turquoise/10"
       />
     </div>
   )

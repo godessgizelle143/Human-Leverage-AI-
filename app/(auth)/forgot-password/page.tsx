@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Sparkles, Mail } from 'lucide-react'
+import { Mail } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/client'
+import BrandMark from '@/components/hke/BrandMark'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -51,12 +52,11 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 bg-brand-black">
+    <main className="backdrop-spot min-h-screen flex items-center justify-center px-6 py-10 bg-brand-black">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <Sparkles className="w-8 h-8 text-brand-gold" />
-            <span className="text-2xl font-bold gradient-text">HKE AI</span>
+          <Link href="/" className="inline-flex mb-6">
+            <BrandMark size="lg" />
           </Link>
           <h1 className="text-3xl font-bold">Reset Your Password</h1>
           <p className="text-white/60 mt-2">
@@ -66,14 +66,14 @@ export default function ForgotPasswordPage() {
 
         <div className="glass rounded-2xl p-8">
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400">
+            <div role="alert" className="notice notice-error mb-4">
               {error}
             </div>
           )}
 
           {sent ? (
             <div className="space-y-4">
-              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+              <div role="status" className="notice notice-success">
                 If an account exists for <span className="font-semibold">{email.trim()}</span>, a
                 password reset link is on its way. Check your inbox and spam folder.
               </div>
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
                     required
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full pl-10 py-3 rounded-lg bg-white/5 border border-white/10 text-white"
+                    className="field !py-3 !pl-10"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
 
           <p className="text-center text-white/50 text-sm mt-6">
             Remembered it?{' '}
-            <Link href="/login" className="text-brand-gold">
+            <Link href="/login" className="link-action">
               Back to Sign In
             </Link>
           </p>

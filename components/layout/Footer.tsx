@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react'
+import BrandMark from '@/components/hke/BrandMark'
 import Link from 'next/link'
 
 export default function Footer() {
@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-brand-gold" />
+              <BrandMark size="sm" wordmark={false} />
               <span className="font-bold gradient-text">Human Knowledge Engine AI</span>
             </div>
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-gold/80 mb-3">HKE AI</p>

@@ -85,6 +85,16 @@ export function getStep(key: StepKey): StepDefinition {
   return STEP_SECTIONS.find((step) => step.key === key) as StepDefinition
 }
 
+/**
+ * The form values for a step (keyed by `input`) from its saved section (keyed
+ * by `stored`), so a saved step reopens with every answer in place. Missing or
+ * non-string values become empty fields.
+ */
+export function stepFormValues(step: StepDefinition, saved: unknown): Record<string, string> {
+  const source = saved && typeof saved === 'object' && !Array.isArray(saved) ? (saved as Record<string, unknown>) : {}
+  return Object.fromEntries(step.fields.map((field) => [field.input, typeof source[field.stored] === 'string' ? (source[field.stored] as string) : '']))
+}
+
 export const MAX_STEP_FIELD_LENGTH = 5000
 
 /** Validates a step request body and returns the section value to store. */

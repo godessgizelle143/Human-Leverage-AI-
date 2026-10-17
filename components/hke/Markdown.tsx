@@ -32,8 +32,8 @@ export default function Markdown({ source }: { source: string }) {
           case 'list': {
             const items = block.items.map((item, itemIndex) => <li key={itemIndex}><Spans spans={item} /></li>)
             return block.ordered
-              ? <ol key={index} className="list-decimal pl-6 space-y-1.5">{items}</ol>
-              : <ul key={index} className="list-disc pl-6 space-y-1.5 marker:text-brand-pink">{items}</ul>
+              ? <ol key={index} className="list-decimal pl-6 space-y-1.5 marker:text-brand-gold">{items}</ol>
+              : <ul key={index} className="list-disc pl-6 space-y-1.5 marker:text-brand-gold">{items}</ul>
           }
         }
       })}

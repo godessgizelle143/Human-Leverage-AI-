@@ -3,11 +3,12 @@ import { LIFECYCLE_LABELS, LIFECYCLE_STAGES, lifecycleStep, type LifecycleStage 
 
 const STAGE_STYLES: Record<LifecycleStage, string> = {
   draft: 'border-white/15 text-white/60',
-  interviewing: 'border-brand-gold/40 text-brand-gold',
-  knowledge_extracted: 'border-brand-gold/60 text-brand-gold bg-brand-gold/10',
-  blueprint_created: 'border-brand-pink/40 text-brand-pink',
+  interviewing: 'border-brand-pink/40 text-brand-pink',
+  // Knowledge in hand: the one stage marked with the turquoise accent.
+  knowledge_extracted: 'border-brand-turquoise/40 text-brand-turquoise',
+  blueprint_created: 'border-brand-gold/50 text-brand-gold',
   assets_generating: 'border-brand-pink/60 text-brand-pink bg-brand-pink/10 animate-pulse',
-  assets_ready: 'border-brand-pink/60 text-white bg-brand-pink/20',
+  assets_ready: 'border-brand-gold/60 text-brand-gold bg-brand-gold/10',
   archived: 'border-white/10 text-white/40',
 }
 
@@ -31,7 +32,7 @@ export function LifecycleTrack({ stage }: { stage: LifecycleStage }) {
         const active = index === step && !done
         return (
           <li key={item} className="min-w-0">
-            <div className={clsx('h-1.5 rounded-full', done ? 'bg-gradient-brand' : active ? 'bg-brand-gold/60' : 'bg-white/10')} />
+            <div className={clsx('h-1.5 rounded-full', done ? 'bg-brand-gold' : active ? 'bg-brand-pink' : 'bg-white/10')} />
             <p className={clsx('mt-2 text-[11px] leading-tight', done || active ? 'text-white/80' : 'text-white/35')}>{LIFECYCLE_LABELS[item]}</p>
           </li>
         )

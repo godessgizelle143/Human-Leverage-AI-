@@ -2,6 +2,7 @@ import { INTERVIEW_QUESTIONS } from '@/types/interview'
 import { ASSET_TYPES, assetTypeLabel } from './assets'
 import { blueprintEntries, blueprintValueToText, stepEntries } from './blueprint'
 import type { ProjectAssetRow } from './db'
+import { BRAND } from '../brand'
 import type { InterviewAnswers } from './interview'
 import { escapeHtml, markdownToHtml, printableShell } from './markdown'
 import { STEP_SECTIONS } from './steps'
@@ -107,9 +108,10 @@ export function kitToMarkdown(kit: Kit) {
 
 const KIT_STYLES = `
   .cover { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; }
-  .cover .eyebrow { font: 600 12px Helvetica, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #b0127a; margin: 0; }
-  .cover h1 { font-size: 2.6rem; margin: .5rem 0 1rem; }
-  .cover .meta { color: #666; font-style: italic; }
+  .cover .plate { background: ${BRAND.black}; color: ${BRAND.white}; border-left: 6px solid ${BRAND.pink}; border-radius: 4px; padding: 2.5rem 2rem; margin-bottom: 1.5rem; }
+  .cover .eyebrow { font: 600 12px Helvetica, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: ${BRAND.pink}; margin: 0; }
+  .cover h1 { font-size: 2.6rem; margin: .5rem 0 1rem; color: ${BRAND.white}; border-bottom-color: ${BRAND.gold}; }
+  .cover .meta { color: ${BRAND.white}; opacity: .7; font-style: italic; margin: 0; }
   .contents { padding-left: 1.25rem; }
   .contents li { margin: .35rem 0; }
   .contents a { color: inherit; text-decoration: none; }
@@ -126,9 +128,11 @@ export function kitToHtml(kit: Kit) {
     .map((section) => `<section class="part" id="${section.id}">\n<h1>${escapeHtml(section.heading)}</h1>\n<p class="label">${escapeHtml(section.label)}</p>\n${markdownToHtml(demoteHeadings(section.markdown, 1))}\n</section>`)
     .join('\n')
   const cover = `<header class="cover">
+<div class="plate">
 <p class="eyebrow">Knowledge Kit</p>
 <h1>${escapeHtml(kit.title)}</h1>
 <p class="meta">Speak Once. Build Forever. · Built with HKE AI on ${escapeHtml(formatDate(kit.generatedAt))}</p>
+</div>
 <h2>Contents</h2>
 <ol class="contents">${contents}</ol>
 </header>`

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Sparkles,
   Mail,
   Lock,
   Eye,
@@ -13,6 +12,7 @@ import {
 
 import { createClient } from '@/lib/supabase/client'
 import { authErrorMessage } from '@/lib/auth/messages'
+import BrandMark from '@/components/hke/BrandMark'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -117,12 +117,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 bg-brand-black">
+    <main className="backdrop-spot min-h-screen flex items-center justify-center px-6 py-10 bg-brand-black">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <Sparkles className="w-8 h-8 text-brand-gold" />
-            <span className="text-2xl font-bold gradient-text">HKE AI</span>
+          <Link href="/" className="inline-flex mb-6">
+            <BrandMark size="lg" />
           </Link>
           <h1 className="text-3xl font-bold">Welcome Back</h1>
           <p className="text-white/60 mt-2">Sign in to continue building your empire</p>
@@ -130,14 +129,14 @@ export default function LoginPage() {
 
         <div className="glass rounded-2xl p-8">
           {error && (
-            <div role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400">
+            <div role="alert" className="notice notice-error mb-4">
               {error}
               {unconfirmed && (
                 <button
                   type="button"
                   onClick={handleResendConfirmation}
                   disabled={resendState !== 'idle' || !email.trim()}
-                  className="mt-2 block text-sm font-semibold text-brand-gold hover:underline disabled:opacity-60 disabled:no-underline"
+                  className="link-action mt-2 block text-sm disabled:opacity-60 disabled:no-underline"
                 >
                   {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? 'Confirmation email sent' : 'Resend confirmation email'}
                 </button>
@@ -155,7 +154,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full pl-10 py-3 rounded-lg bg-white/5 border border-white/10 text-white"
+                  className="field !py-3 !pl-10"
                   placeholder="you@example.com"
                 />
               </div>
@@ -166,7 +165,7 @@ export default function LoginPage() {
                 <label className="text-sm text-white/60">Password</label>
                 <Link
                   href={email.trim() ? `/forgot-password?email=${encodeURIComponent(email.trim())}` : '/forgot-password'}
-                  className="text-sm text-brand-gold"
+                  className="link-action text-sm"
                 >
                   Forgot password?
                 </Link>
@@ -178,7 +177,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 rounded-lg bg-white/5 border border-white/10 text-white"
+                  className="field !py-3 !pl-10 !pr-12"
                   placeholder="••••••••"
                 />
                 <button
@@ -208,7 +207,7 @@ export default function LoginPage() {
 
           <p className="text-center text-white/50 text-sm mt-6">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-brand-gold">
+            <Link href="/register" className="link-action">
               Sign up free
             </Link>
           </p>

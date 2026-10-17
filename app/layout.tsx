@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Fraunces, Inter } from 'next/font/google'
 import './globals.css'
+import { DEMO_WRITE_MESSAGE, isDemoMode } from '@/lib/demo/mode'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,7 +32,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {isDemoMode() && <div role="status" className="demo-banner">{DEMO_WRITE_MESSAGE}</div>}
+        {children}
+      </body>
     </html>
   )
 }

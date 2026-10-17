@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Sparkles } from 'lucide-react'
 
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm'
 import { isRecoveryFor, RECOVERY_COOKIE } from '@/lib/auth/recovery'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import BrandMark from '@/components/hke/BrandMark'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,12 +33,11 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
   const ready = isRecoveryFor(cookieStore.get(RECOVERY_COOKIE)?.value, user?.id)
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 bg-brand-black">
+    <main className="backdrop-spot min-h-screen flex items-center justify-center px-6 py-10 bg-brand-black">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <Sparkles className="w-8 h-8 text-brand-gold" />
-            <span className="text-2xl font-bold gradient-text">HKE AI</span>
+          <Link href="/" className="inline-flex mb-6">
+            <BrandMark size="lg" />
           </Link>
           <h1 className="text-3xl font-bold">Choose a New Password</h1>
         </div>

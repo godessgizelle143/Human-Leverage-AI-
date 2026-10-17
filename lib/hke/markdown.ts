@@ -3,6 +3,8 @@
 // It produces structured blocks so the UI never needs dangerouslySetInnerHTML,
 // and the HTML export escapes every piece of text.
 
+import { BRAND } from '../brand'
+
 export type InlineSpan = { text: string; bold?: boolean; italic?: boolean }
 
 export type MarkdownBlock =
@@ -109,15 +111,18 @@ export function markdownToHtml(source: string) {
     .join('\n')
 }
 
+// Deliverables are printed, so the page stays white; the palette carries the brand.
 const PRINT_STYLES = `
-  body { font-family: Georgia, 'Times New Roman', serif; color: #171512; max-width: 720px; margin: 48px auto; padding: 0 24px; line-height: 1.65; }
+  html { border-top: 6px solid ${BRAND.pink}; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: ${BRAND.black}; background: ${BRAND.white}; max-width: 720px; margin: 48px auto; padding: 0 24px; line-height: 1.65; }
   h1, h2, h3 { font-family: Helvetica, Arial, sans-serif; line-height: 1.25; }
-  h1 { font-size: 2rem; border-bottom: 3px solid #D4AF37; padding-bottom: .4rem; }
-  h2 { font-size: 1.4rem; margin-top: 2rem; color: #b0127a; }
+  h1 { font-size: 2rem; border-bottom: 3px solid ${BRAND.gold}; padding-bottom: .4rem; }
+  h2 { font-size: 1.4rem; margin-top: 2rem; color: ${BRAND.pink}; }
   h3 { font-size: 1.1rem; margin-top: 1.5rem; }
-  blockquote { border-left: 3px solid #FF1493; margin: 1rem 0; padding: .25rem 1rem; color: #444; }
+  li::marker { color: ${BRAND.gold}; font-weight: 700; }
+  blockquote { border-left: 3px solid ${BRAND.pink}; margin: 1rem 0; padding: .25rem 1rem; color: #444; }
   hr { border: 0; border-top: 1px solid #ddd; margin: 2rem 0; }
-  footer { margin-top: 3rem; font: 12px Helvetica, Arial, sans-serif; color: #888; }
+  footer { margin-top: 3rem; padding-top: .75rem; border-top: 1px solid ${BRAND.turquoise}; font: 12px Helvetica, Arial, sans-serif; color: #666; }
   @media print { body { margin: 0 auto; } }`
 
 /** The print-ready page every HKE export uses. `body` must already be escaped HTML. */

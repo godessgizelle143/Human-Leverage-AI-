@@ -2,6 +2,12 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Local demo preview has no Supabase credentials; skip auth middleware.
+  // This bypass is disabled in production.
+  if (process.env.NODE_ENV !== 'production' && process.env.HKE_DEMO_MODE === '1') {
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,

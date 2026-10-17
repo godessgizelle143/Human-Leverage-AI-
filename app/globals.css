@@ -2,24 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --brand-black:#0a0a0a; --brand-gold:#D4AF37; --brand-pink:#FF1493; }
-* { box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-body { margin:0; background:#0a0a0a; color:#fff; font-family:var(--font-inter),system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
-.glass { background:rgba(255,255,255,.05); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.1); }
-.glass-hover:hover { background:rgba(255,255,255,.08); border-color:rgba(212,175,55,.3); }
-.gradient-text { background:linear-gradient(135deg,#D4AF37 0%,#FF1493 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.gradient-border { position:relative; border:1px solid transparent; background-clip:padding-box; }
-.gradient-border::before { content:''; position:absolute; inset:0; z-index:-1; margin:-1px; border-radius:inherit; background:linear-gradient(135deg,#D4AF37 0%,#FF1493 100%); }
-.btn-primary { display:inline-flex; align-items:center; background:linear-gradient(135deg,#D4AF37 0%,#FF1493 100%); color:#0a0a0a; font-weight:700; padding:.75rem 1.5rem; border-radius:.5rem; transition:all .3s; }
-.btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 40px rgba(212,175,55,.3); }
-.btn-secondary { display:inline-flex; align-items:center; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:#fff; padding:.75rem 1.5rem; border-radius:.5rem; transition:all .3s; }
-.btn-secondary:hover { border-color:#D4AF37; background:rgba(255,255,255,.08); }
-@keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(212,175,55,.3)} 50%{box-shadow:0 0 40px rgba(255,20,147,.4)} }
+/* Colors come from lib/brand.ts through the Tailwind theme. */
+@layer base {
+  :root {
+    --brand-black: theme(colors.brand.black);
+    --brand-pink: theme(colors.brand.pink);
+    --brand-gold: theme(colors.brand.gold);
+    --brand-turquoise: theme(colors.brand.turquoise);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: theme(colors.brand.black); color: theme(colors.brand.white); font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  ::selection { background: theme(colors.brand.pink / 40%); color: theme(colors.brand.white); }
+  :focus-visible { outline: 2px solid theme(colors.brand.pink); outline-offset: 2px; }
+  ::-webkit-scrollbar { width: 7px; }
+  ::-webkit-scrollbar-track { background: theme(colors.white / 5%); }
+  ::-webkit-scrollbar-thumb { background: theme(colors.brand.gold / 30%); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: theme(colors.brand.gold / 50%); }
+}
+
+@layer components {
+  /* Surfaces */
+  .glass { background: theme(colors.brand.surface / 85%); backdrop-filter: blur(12px); border: 1px solid theme(colors.white / 10%); }
+  .glass-hover { transition: border-color .3s, background-color .3s; }
+  .glass-hover:hover { background: theme(colors.brand.raised); border-color: theme(colors.brand.gold / 35%); }
+  .surface-inset { border: 1px solid theme(colors.white / 10%); background: theme(colors.white / 3%); }
+  /* The one highlighted panel on a screen: next action, hero, kit. */
+  .panel-feature { position: relative; overflow: hidden; border: 1px solid theme(colors.brand.gold / 30%); background: linear-gradient(135deg, theme(colors.brand.pink / 12%) 0%, theme(colors.brand.surface) 45%, theme(colors.brand.gold / 9%) 100%); }
+  .card-link { transition: border-color .3s; }
+  .card-link:hover { border-color: theme(colors.brand.pink / 50%); }
+
+  /* Ambient page glows: pink leads, gold answers. */
+  .backdrop-hero { background: radial-gradient(circle at 25% 15%, theme(colors.brand.pink / 16%), transparent 32%), radial-gradient(circle at 80% 20%, theme(colors.brand.gold / 11%), transparent 30%); }
+  .backdrop-spot { background: radial-gradient(circle at 50% 50%, theme(colors.brand.pink / 12%), transparent 38%); }
+
+  /* Brand marks */
+  .gradient-text { background: theme(backgroundImage.gradient-brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  /* A 1px gradient outline; the mask keeps the gradient out of the card's fill. */
+  .gradient-border { position: relative; border: 1px solid transparent; }
+  .gradient-border::before { content: ''; position: absolute; inset: -1px; padding: 1px; border-radius: inherit; background: theme(backgroundImage.gradient-brand); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+  .brand-mark { display: grid; place-items: center; border-radius: .5rem; background: theme(backgroundImage.gradient-brand); color: theme(colors.brand.black); font-weight: 900; letter-spacing: -.01em; box-shadow: 0 0 20px theme(colors.brand.pink / 25%); }
+
+  /* Actions: pink is the primary action; gold only outlines. */
+  .btn-primary { display: inline-flex; align-items: center; justify-content: center; background: theme(colors.brand.pink); color: theme(colors.brand.black); font-weight: 700; padding: .75rem 1.5rem; border-radius: .5rem; transition: transform .3s, box-shadow .3s, filter .3s; }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); box-shadow: theme(boxShadow.glow-pink); }
+  .btn-secondary { display: inline-flex; align-items: center; justify-content: center; background: theme(colors.white / 4%); border: 1px solid theme(colors.white / 14%); color: theme(colors.brand.white); padding: .75rem 1.5rem; border-radius: .5rem; transition: border-color .3s, background-color .3s; }
+  .btn-secondary:hover:not(:disabled) { border-color: theme(colors.brand.gold); background: theme(colors.white / 8%); }
+  .btn-primary:disabled, .btn-secondary:disabled { cursor: not-allowed; }
+  .link-action { font-weight: 600; color: theme(colors.brand.pink); }
+  .link-action:hover { text-decoration: underline; }
+  .link-quiet { color: theme(colors.white / 65%); transition: color .2s; }
+  .link-quiet:hover { color: theme(colors.brand.white); }
+
+  /* Type */
+  .eyebrow { font-size: .75rem; line-height: 1rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: theme(colors.brand.gold); }
+  .eyebrow-pink { color: theme(colors.brand.pink); }
+
+  /* Forms */
+  .field { width: 100%; border-radius: .75rem; border: 1px solid theme(colors.white / 10%); background: theme(colors.white / 5%); padding: 1rem; color: theme(colors.brand.white); outline: none; transition: border-color .2s, box-shadow .2s; }
+  .field::placeholder { color: theme(colors.white / 30%); }
+  .field:focus { border-color: theme(colors.brand.pink); box-shadow: 0 0 0 3px theme(colors.brand.pink / 18%); }
+  select.field option { background: theme(colors.brand.surface); color: theme(colors.brand.white); }
+  .field-label { display: block; margin-bottom: .5rem; font-size: .875rem; font-weight: 600; }
+
+  /* Messages */
+  .notice { border-radius: .75rem; border: 1px solid theme(colors.white / 15%); background: theme(colors.white / 5%); padding: .875rem 1rem; font-size: .875rem; line-height: 1.5; color: theme(colors.white / 70%); }
+  .notice-success { border-color: theme(colors.brand.turquoise / 30%); background: theme(colors.brand.turquoise / 8%); color: theme(colors.brand.turquoise); }
+  .notice-error { border-color: theme(colors.red.400 / 30%); background: theme(colors.red.400 / 10%); color: theme(colors.red.200); }
+  .notice-brand { border-color: theme(colors.brand.pink / 30%); background: theme(colors.brand.pink / 6%); color: theme(colors.brand.white); }
+  .notice-gold { border-color: theme(colors.brand.gold / 30%); background: theme(colors.brand.gold / 10%); color: theme(colors.brand.gold); }
+
+  /* Journey rail: the line that joins capture to kit. */
+  .journey-link { position: relative; height: 2px; flex: 1 1 0%; background: theme(colors.white / 10%); }
+  .journey-link-done { background: theme(colors.brand.gold / 70%); }
+  .journey-link-flow { background: linear-gradient(90deg, theme(colors.brand.gold / 70%), theme(colors.brand.pink)); }
+  .journey-pulse { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+  /* Workspace pieces */
+  .stat-tile { border-radius: 1rem; border: 1px solid theme(colors.white / 10%); background: theme(colors.brand.surface); padding: 1rem 1.125rem; }
+  .stat-value { font-size: 1.875rem; line-height: 1; font-weight: 800; letter-spacing: -.02em; }
+  .chip { display: inline-flex; align-items: center; gap: .375rem; border-radius: 9999px; border: 1px solid theme(colors.white / 12%); padding: .25rem .75rem; font-size: .75rem; font-weight: 600; color: theme(colors.white / 65%); transition: border-color .2s, color .2s, background-color .2s; }
+  .chip:hover { color: theme(colors.brand.white); border-color: theme(colors.white / 30%); }
+  .chip-active, .chip-active:hover { border-color: theme(colors.brand.pink); background: theme(colors.brand.pink / 12%); color: theme(colors.brand.white); }
+  /* A sheet of the printed deliverable, shown small. */
+  .paper { background: theme(colors.brand.white); color: theme(colors.brand.black); border-top: 4px solid theme(colors.brand.pink); border-radius: .375rem; box-shadow: 0 24px 60px -20px theme(colors.black), 0 0 0 1px theme(colors.white / 10%); }
+  .demo-banner { position: relative; z-index: 60; border-bottom: 1px solid theme(colors.brand.gold / 40%); background: theme(colors.brand.gold); color: theme(colors.brand.black); padding: .375rem 1rem; text-align: center; font-size: .75rem; font-weight: 700; }
+
+  /* Turquoise is reserved for these small status marks. */
+  .status-dot { display: inline-block; height: .375rem; width: .375rem; flex-shrink: 0; border-radius: 9999px; background: theme(colors.brand.turquoise); box-shadow: 0 0 8px theme(colors.brand.turquoise / 70%); }
+  .text-status { color: theme(colors.brand.turquoise); }
+  .eyebrow-flow { color: theme(colors.brand.turquoise); }
+  /* Knowledge moving from one step to the next: a thin turquoise connector. */
+  .flow-step { position: relative; }
+  .flow-step::after { content: ''; position: absolute; left: 2.5rem; top: 100%; width: 2px; height: .75rem; background: theme(colors.brand.turquoise / 80%); }
+  .flow-card { border-left: 2px solid theme(colors.brand.turquoise / 70%); }
+  /* Homepage lettering accents: a faint turquoise/teal shimmer, never a fill. */
+  .accent-glow { text-shadow: 0 0 34px theme(colors.brand.turquoise / 38%), 0 0 1px theme(colors.brand.turquoise / 45%); }
+  .accent-dot { color: theme(colors.brand.turquoiseDeep); text-shadow: 0 0 18px theme(colors.brand.turquoiseDeep / 60%); }
+  .accent-word { color: color-mix(in srgb, theme(colors.brand.turquoise) 62%, theme(colors.brand.white)); }
+  .accent-underline { text-decoration: underline; text-decoration-color: theme(colors.brand.turquoiseDeep / 75%); text-decoration-thickness: 1px; text-underline-offset: 5px; }
+  .nav-accent { position: relative; }
+  .nav-accent::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: theme(colors.brand.turquoiseDeep); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+  .nav-accent:hover::after, .nav-accent:focus-visible::after { transform: scaleX(1); }
+  .cta-edge { box-shadow: 0 0 0 2px theme(colors.brand.black), 0 0 0 3px theme(colors.brand.turquoise / 55%); }
+  .hairline-accent { height: 1px; background: linear-gradient(90deg, theme(colors.brand.turquoiseDeep / 55%), theme(colors.white / 8%) 70%); }
+  .rule-accent { border-color: theme(colors.brand.turquoise / 28%); }
+  .card-accent:hover { border-color: theme(colors.brand.turquoise / 45%); }
+  .journey-link-knowledge { background: linear-gradient(90deg, theme(colors.brand.turquoise / 75%), theme(colors.brand.turquoise / 15%)); }
+}
+
+@keyframes glow { 0%,100%{box-shadow:0 0 20px theme(colors.brand.gold / 30%)} 50%{box-shadow:0 0 40px theme(colors.brand.pink / 40%)} }
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 .animate-glow { animation:glow 2s ease-in-out infinite; }
 .animate-float { animation:float 6s ease-in-out infinite; }
-::-webkit-scrollbar { width:7px; }
-::-webkit-scrollbar-track { background:rgba(255,255,255,.05); }
-::-webkit-scrollbar-thumb { background:rgba(212,175,55,.3); border-radius:4px; }
-::-webkit-scrollbar-thumb:hover { background:rgba(212,175,55,.5); }

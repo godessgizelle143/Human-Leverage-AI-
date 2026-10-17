@@ -62,16 +62,16 @@ export default function ResetPasswordForm({ initialStatus }: { initialStatus: 'r
   if (status === 'invalid') {
     return (
       <div className="space-y-4">
-        <div className="p-3 rounded-lg bg-red-500/10 text-red-400" role="alert">
+        <div className="notice notice-error" role="alert">
           This password reset link is invalid or has expired. Please request a new one and
           open it in the same browser you requested it from.
         </div>
-        <Link href="/forgot-password" className="btn-primary w-full py-3 block text-center">
+        <Link href="/forgot-password" className="btn-primary w-full justify-center py-3">
           Request a New Link
         </Link>
         <p className="text-center text-white/50 text-sm">
           Remembered it?{' '}
-          <Link href="/login" className="text-brand-gold">Back to Sign In</Link>
+          <Link href="/login" className="link-action">Back to Sign In</Link>
         </p>
       </div>
     )
@@ -80,10 +80,10 @@ export default function ResetPasswordForm({ initialStatus }: { initialStatus: 'r
   if (status === 'done') {
     return (
       <div className="space-y-4">
-        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400" role="status">
+        <div className="notice notice-success" role="status">
           Your password has been updated. Sign in with your new password to continue.
         </div>
-        <Link href="/login" className="btn-primary w-full py-3 block text-center">
+        <Link href="/login" className="btn-primary w-full justify-center py-3">
           Go to Sign In
         </Link>
       </div>
@@ -93,7 +93,7 @@ export default function ResetPasswordForm({ initialStatus }: { initialStatus: 'r
   return (
     <>
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400" role="alert">
+        <div className="notice notice-error mb-4" role="alert">
           {error}
         </div>
       )}
@@ -112,7 +112,7 @@ export default function ResetPasswordForm({ initialStatus }: { initialStatus: 'r
               maxLength={MAX_PASSWORD_LENGTH}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full pl-10 pr-12 py-3 rounded-lg bg-white/5 border border-white/10 text-white"
+              className="field !py-3 !pl-10 !pr-12"
               placeholder="••••••••"
             />
             <button
@@ -140,7 +140,7 @@ export default function ResetPasswordForm({ initialStatus }: { initialStatus: 'r
               maxLength={MAX_PASSWORD_LENGTH}
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full pl-10 pr-12 py-3 rounded-lg bg-white/5 border border-white/10 text-white"
+              className="field !py-3 !pl-10 !pr-12"
               placeholder="••••••••"
             />
           </div>
