@@ -34,3 +34,11 @@ Luxury "empire-builder" look: deep black backgrounds, metallic gold headings,
 neon hot-pink script accents, glowing highlights. Motifs: gold crown, butterflies,
 sunset city skyline. Feels premium, feminine, powerful. Name shown everywhere:
 "The Human Knowledge Engine" (HKE). Never "Human Leverage AI".
+
+## Product principles (every feature must follow these)
+- Gentle and judgment-free. Users may not be confident with spelling, grammar, typing, or technology. Never make them feel corrected or "not smart."
+- Silently clean up user input (spelling, punctuation, grammar) in everything HKE generates. Never point out their mistakes.
+- Plain language by default: short sentences, everyday words, about a 6th-grade reading level.
+- Show examples wherever a user has to answer or decide something, so they never face a blank box.
+- The heavy lifting happens behind the scenes. The user should only see simple next steps.
+- Adapt to the person: start simple, and offer more depth as they show they're ready.
