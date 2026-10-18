@@ -22,6 +22,7 @@ export const BlueprintOutputSchema = z
     differentiation: optionalValue,
     products_services: optionalValue,
     brand_voice: optionalValue,
+    brand_visuals: optionalValue,
     origin_story: optionalValue,
     mission_values: optionalValue,
     customer_transformation: optionalValue,

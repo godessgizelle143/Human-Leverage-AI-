@@ -3,6 +3,8 @@ import { PRICING_PLANS } from '@/lib/stripe/client'
 import { ASSET_TYPES, displayStatus } from '@/lib/hke/assets'
 import { ASSET_COLUMNS, ASSET_SUMMARY_COLUMNS, PROJECT_COLUMNS, SUBSCRIPTION_COLUMNS } from '@/lib/hke/db'
 import { canGenerateAsset, canGenerateBlueprint, denialToError, PLAN_LIMITS, usageFor } from '@/lib/hke/entitlements'
+import { blueprintEntries } from '@/lib/hke/blueprint'
+import { blueprintRequest } from '@/lib/hke/intelligence/prompts'
 import { BlueprintOutputSchema } from '@/lib/hke/intelligence/schemas'
 import { parseInterviewMessages, sanitizeAnswers, serializeInterviewMessages } from '@/lib/hke/interview'
 import { assembleKnowledge, knowledgeToPromptContext } from '@/lib/hke/knowledge'
@@ -69,6 +71,24 @@ describe('blueprint schema', () => {
   it('rejects non-text values and oversized output', () => {
     expect(BlueprintOutputSchema.safeParse({ business_summary: 'a', elevator_pitch: 'b', brand_voice: 42 }).success).toBe(false)
     expect(BlueprintOutputSchema.safeParse({ business_summary: 'a', elevator_pitch: 'b', next_steps: Array.from({ length: 40 }, () => 'x'.repeat(4000)) }).success).toBe(false)
+  })
+
+  it('keeps brand colors and style as text or a list', () => {
+    expect(BlueprintOutputSchema.parse({ business_summary: 'a', elevator_pitch: 'b', brand_visuals: 'Yellow, purple, and blue' }).brand_visuals).toBe('Yellow, purple, and blue')
+    expect(BlueprintOutputSchema.parse({ business_summary: 'a', elevator_pitch: 'b', brand_visuals: ['Yellow', 'Purple'] }).brand_visuals).toEqual(['Yellow', 'Purple'])
+  })
+
+  it('shows brand colors and style right after brand voice', () => {
+    const labels = blueprintEntries({ business_summary: 'a', elevator_pitch: 'b', brand_voice: 'Warm', brand_visuals: 'Gold and black', origin_story: 'c' }).map((entry) => entry.label)
+    expect(labels.slice(labels.indexOf('Brand Voice'), labels.indexOf('Brand Voice') + 2)).toEqual(['Brand Voice', 'Brand Colors & Style'])
+  })
+
+  it('asks for brand colors and style, cleaned up, from the colors answer', () => {
+    const request = blueprintRequest({ '7': 'Warm', '8': 'yellow, purple blue turquoise' })
+    expect(request.system).toContain('brand_voice, brand_visuals,')
+    expect(request.system).toContain('Quietly fix spelling, punctuation, and capitalization')
+    expect(request.system).toContain('add none of your own')
+    expect(request.user).toContain('A: yellow, purple blue turquoise')
   })
 })
 

@@ -67,7 +67,7 @@ describe('generateBlueprint', () => {
     const content = calls.finish[0].content as Record<string, unknown>
     expect(content.recommended_modules).toEqual([])
     expect(content).not.toHaveProperty('injected_key')
-    expect(content.generation).toMatchObject({ model: 'test-model', prompt_version: 1 })
+    expect(content.generation).toMatchObject({ model: 'test-model', prompt_version: 2 })
   })
 
   it('maps denials to clear errors without calling the model', async () => {

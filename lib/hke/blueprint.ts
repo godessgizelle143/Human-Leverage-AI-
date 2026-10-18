@@ -9,6 +9,7 @@ export const BLUEPRINT_SECTIONS: { key: string; label: string }[] = [
   { key: 'products_services', label: 'Products & Services' },
   { key: 'customer_transformation', label: 'Customer Transformation' },
   { key: 'brand_voice', label: 'Brand Voice' },
+  { key: 'brand_visuals', label: 'Brand Colors & Style' },
   { key: 'origin_story', label: 'Origin Story' },
   { key: 'mission_values', label: 'Mission & Values' },
   { key: 'goals_6_12_months', label: 'Goals: Next 6–12 Months' },

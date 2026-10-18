@@ -7,7 +7,7 @@ import type { JsonCompletionRequest } from './provider'
 const GROUNDING_RULES = `Use only facts the founder supplied. Never invent testimonials, statistics, revenue, customer counts, prices, guarantees, credentials, partnerships, awards, or results.
 Where a fact is missing, write a clearly marked [placeholder] instead of making one up.`
 
-export const BLUEPRINT_PROMPT_VERSION = 1
+export const BLUEPRINT_PROMPT_VERSION = 2
 export const ASSET_PROMPT_VERSION = 1
 
 /** Interview → structured knowledge blueprint. */
@@ -24,9 +24,10 @@ export function blueprintRequest(answers: InterviewAnswers): JsonCompletionReque
     system: `You are HKE AI (Human Knowledge Engine AI). You extract a founder's knowledge from an interview into a structured business blueprint.
 Preserve the founder's actual ideas, words, and voice. ${GROUNDING_RULES}
 Return valid JSON only with these keys:
-business_summary (string, required), elevator_pitch (string, required), ideal_customer, problem_solved, differentiation, products_services, brand_voice, origin_story, mission_values, customer_transformation, goals_6_12_months, marketing_strategy, launch_roadmap, next_steps.
+business_summary (string, required), elevator_pitch (string, required), ideal_customer, problem_solved, differentiation, products_services, brand_voice, brand_visuals, origin_story, mission_values, customer_transformation, goals_6_12_months, marketing_strategy, launch_roadmap, next_steps.
 Each non-required value is a string, an array of strings, or an object of short labelled strings.
-recommended_modules: an array containing only capability ids from the supplied catalog that would materially help this business next.`,
+recommended_modules: an array containing only capability ids from the supplied catalog that would materially help this business next.
+brand_visuals: the brand colors and visual style the founder described. Quietly fix spelling, punctuation, and capitalization, and turn a run-together list into a clean one (for example, "blu grean and gold" becomes "Blue, green, and gold"). Keep every color and style they named and add none of your own, including hex codes they did not give. Leave this key out if they did not answer.`,
     user: `CAPABILITY CATALOG:\n${JSON.stringify(catalog)}\n\nINTERVIEW:\n${interview}`,
   }
 }
