@@ -117,6 +117,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       return {
         kind: 'project' as const, id: project.id, title: project.title, stage: project.stage, journey: project.journey, updatedAt: project.updated_at,
         href: `/projects/${project.id}`,
+        vaultHref: `/vault/${project.interview_id}`,
         summary: building ? 'HKE AI is building the blueprint…' : `${project.stepsDone} of ${STEP_SECTIONS.length} plan steps · ${project.readyAssets} asset${project.readyAssets === 1 ? '' : 's'} ready`,
         next: { label: stage.cta, href: building ? `/projects/${project.id}` : stage.href ?? `/projects/${project.id}` },
       }
@@ -124,6 +125,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     ...activeDrafts.map((draft) => ({
       kind: 'interview' as const, id: draft.id, title: draft.title, stage: draft.stage, journey: draft.journey, updatedAt: draft.updated_at,
       href: `/builder?interview=${draft.id}`,
+      vaultHref: `/vault/${draft.id}`,
       summary: `Interview · ${draft.journey[0].detail}`,
       next: { label: draft.stage === 'knowledge_extracted' ? 'Build blueprint' : draft.answered ? 'Resume interview' : 'Start the interview', href: `/builder?interview=${draft.id}` },
     })),
@@ -203,6 +205,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 <div className="mt-7 flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-white/60">Next step: <span className="font-semibold text-white">{currentStage(spotlight.journey).label}</span> — {currentStage(spotlight.journey).summary.toLowerCase()}.</p>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Link href={spotlight.vaultHref} className="btn-secondary">Open Knowledge Vault</Link>
                     {spotlight.kind === 'project' && spotlight.next.href !== spotlight.href && <Link href={spotlight.href} className="btn-secondary">Open workspace</Link>}
                     <Link href={spotlight.next.href} className="btn-primary">{spotlight.next.label} →</Link>
                   </div>
@@ -249,7 +252,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                       <p className="mt-1.5 text-sm text-white/50">{item.summary}</p>
                       <JourneyRail stages={item.journey} compact className="mt-5" />
                       <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-                        <Link href={item.next.href} className="link-action text-sm">{item.next.label} →</Link>
+                        <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <Link href={item.next.href} className="link-action text-sm">{item.next.label} →</Link>
+                          <Link href={item.vaultHref} className="link-quiet text-sm">Open Knowledge Vault</Link>
+                        </span>
                         <span className="flex items-center gap-4">
                           <span className="text-xs text-white/40">{new Date(item.updatedAt).toLocaleDateString()}</span>
                           {item.kind === 'interview' && <ArchiveButton kind="interview" id={item.id} archived={false} />}

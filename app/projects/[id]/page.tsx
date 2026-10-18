@@ -107,8 +107,9 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
           <StageSection id="capture" index={1} state={stateOf('capture')} label="Capture" title="Your expertise, in your words" summary="Everything below is built from these answers, and nothing else." aside={`${answered} of ${TOTAL_QUESTIONS} answered`}>
             <div className="glass rounded-2xl p-5 sm:p-6">
               <ProgressMeter value={Math.round((answered / TOTAL_QUESTIONS) * 100)} label="Knowledge interview" />
+              <Link href={`/vault/${project.interview_id}`} className="link-action mt-4 inline-block text-sm">Open Knowledge Vault →</Link>
               <details className="group mt-4">
-                <summary className="link-action cursor-pointer text-sm">View your answers</summary>
+                <summary className="link-quiet cursor-pointer text-sm">View your answers</summary>
                 <dl className="mt-4 grid gap-x-8 gap-y-4 md:grid-cols-2">
                   {INTERVIEW_QUESTIONS.map((question) => (
                     <div key={question.id} className="min-w-0 border-l border-white/10 pl-4">
