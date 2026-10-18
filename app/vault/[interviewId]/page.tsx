@@ -7,6 +7,7 @@ import { isUuid } from '@/lib/hke/server'
 import { canOpenVault, groupVaultAnswers } from '@/lib/hke/vault'
 import AppHeader from '@/components/hke/AppHeader'
 import { ProgressMeter } from '@/components/hke/LifecycleBadge'
+import RefreshOnReturn from '@/components/hke/RefreshOnReturn'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,7 @@ export default async function KnowledgeVaultPage({ params }: { params: { intervi
 
   return (
     <main className="min-h-screen bg-brand-black text-white">
+      <RefreshOnReturn renderId={crypto.randomUUID()} />
       <AppHeader backHref="/dashboard" backLabel="Dashboard" />
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
         <p className="eyebrow eyebrow-pink">Knowledge Vault</p>

@@ -18,6 +18,7 @@ import NewProjectButton from '@/components/hke/NewProjectButton'
 import RefreshButton from '@/components/hke/RefreshButton'
 import UsagePanel from '@/components/hke/UsagePanel'
 import { LifecycleBadge } from '@/components/hke/LifecycleBadge'
+import RefreshOnReturn from '@/components/hke/RefreshOnReturn'
 
 export const dynamic = 'force-dynamic'
 
@@ -127,7 +128,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       href: `/builder?interview=${draft.id}`,
       vaultHref: `/vault/${draft.id}`,
       summary: `Interview · ${draft.journey[0].detail}`,
-      next: { label: draft.stage === 'knowledge_extracted' ? 'Build blueprint' : draft.answered ? 'Resume interview' : 'Start the interview', href: `/builder?interview=${draft.id}` },
+      next: { label: draft.stage === 'knowledge_extracted' ? 'Build my blueprint' : draft.answered ? 'Resume interview' : 'Start the interview', href: `/builder?interview=${draft.id}` },
     })),
   ].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
   const spotlight = workspace[0] ?? null
@@ -143,6 +144,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
   return (
     <main className="min-h-screen bg-brand-black text-white">
+      <RefreshOnReturn renderId={crypto.randomUUID()} />
       <AppHeader />
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
