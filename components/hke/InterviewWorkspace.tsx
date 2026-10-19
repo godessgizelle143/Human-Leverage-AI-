@@ -9,6 +9,8 @@ import { createClient } from '@/lib/supabase/client'
 import { answeredCount, progressFor, TOTAL_QUESTIONS, type InterviewAnswers } from '@/lib/hke/interview'
 import { buildJourney } from '@/lib/hke/journey'
 import JourneyRail from './JourneyRail'
+import LevelCrown from './LevelCrown'
+import { levelFor } from '@/lib/hke/levels'
 import { ProgressMeter } from './LifecycleBadge'
 
 type SaveState = 'idle' | 'pending' | 'saving' | 'saved' | 'error'
@@ -268,6 +270,7 @@ export default function InterviewWorkspace(props: InterviewWorkspaceProps) {
         <div className="min-w-0">
           <p className="eyebrow mb-1">Stage 1 of 5 · Capture</p>
           <h1 className="text-3xl font-black tracking-tight truncate sm:text-4xl">{answers['1']?.trim() || 'New HKE AI Project'}</h1>
+          <LevelCrown level={levelFor(journey)} size="sm" className="mt-3" />
         </div>
         <div className="flex items-center gap-4 text-sm">
           <span className={clsx('inline-flex items-center gap-2', saveState === 'error' ? 'text-red-300' : 'text-white/50')} aria-live="polite">{saveState === 'saved' && <span className="status-dot" aria-hidden />}{saveLabel}</span>

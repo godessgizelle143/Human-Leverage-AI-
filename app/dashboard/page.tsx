@@ -14,6 +14,8 @@ import { STEP_SECTIONS } from '@/lib/hke/steps'
 import AppHeader from '@/components/hke/AppHeader'
 import ArchiveButton from '@/components/hke/ArchiveButton'
 import JourneyRail from '@/components/hke/JourneyRail'
+import LevelCrown from '@/components/hke/LevelCrown'
+import { levelFor } from '@/lib/hke/levels'
 import NewProjectButton from '@/components/hke/NewProjectButton'
 import RefreshButton from '@/components/hke/RefreshButton'
 import UsagePanel from '@/components/hke/UsagePanel'
@@ -203,6 +205,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                   <Link href={spotlight.href} className="hover:text-brand-pink">{spotlight.title}</Link>
                 </h2>
                 <p className="mt-2 text-sm text-white/55">{spotlight.summary} · Saved {when(spotlight.updatedAt)}</p>
+                <LevelCrown level={levelFor(spotlight.journey)} size="md" showTagline className="mt-6" />
                 <JourneyRail stages={spotlight.journey} className="mt-7" />
                 <div className="mt-7 flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-white/60">Next step: <span className="font-semibold text-white">{currentStage(spotlight.journey).label}</span> — {currentStage(spotlight.journey).summary.toLowerCase()}.</p>
@@ -252,7 +255,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         <LifecycleBadge stage={item.stage} />
                       </div>
                       <p className="mt-1.5 text-sm text-white/50">{item.summary}</p>
-                      <JourneyRail stages={item.journey} compact className="mt-5" />
+                      <LevelCrown level={levelFor(item.journey)} size="sm" className="mt-4" />
+                      <JourneyRail stages={item.journey} compact className="mt-4" />
                       <div className="mt-auto flex items-center justify-between gap-3 pt-5">
                         <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
                           <Link href={item.next.href} className="link-action text-sm">{item.next.label} →</Link>

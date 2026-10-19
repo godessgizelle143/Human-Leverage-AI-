@@ -116,6 +116,52 @@
   .journey-link-knowledge { background: linear-gradient(90deg, theme(colors.brand.turquoise / 75%), theme(colors.brand.turquoise / 15%)); }
 }
 
+/* Build levels: each journey stage gives the project page a look you can recognize
+   from across the room. The level comes from lib/hke/levels.ts. */
+@layer components {
+  .level-backdrop { pointer-events: none; position: absolute; inset: 0; z-index: 0; }
+  /* 1 · Spark — a soft pink glow. */
+  .level-1 { background: radial-gradient(circle at 20% 0%, theme(colors.brand.pink / 18%), transparent 45%); }
+  /* 2 · Foundation — gold arrives: a warm corner glow and a thin gold frame. */
+  .level-2 { background: radial-gradient(circle at 15% 0%, theme(colors.brand.pink / 16%), transparent 42%), radial-gradient(circle at 90% 5%, theme(colors.brand.gold / 16%), transparent 38%); box-shadow: inset 0 0 0 1px theme(colors.brand.gold / 22%); }
+  /* 3 · Rising — a sunset sweeps across the top of the page. */
+  .level-3 { background: linear-gradient(180deg, theme(colors.brand.pink / 22%) 0%, theme(colors.brand.gold / 14%) 22%, transparent 48%), radial-gradient(ellipse at 50% 0%, theme(colors.brand.goldLight / 14%), transparent 50%); box-shadow: inset 0 0 0 1px theme(colors.brand.gold / 28%); }
+  /* 4 · Building — metallic gold light and drifting butterflies. */
+  .level-4 { background: radial-gradient(circle at 85% 8%, theme(colors.brand.gold / 26%), transparent 40%), radial-gradient(circle at 10% 20%, theme(colors.brand.pink / 16%), transparent 40%), linear-gradient(180deg, theme(colors.brand.goldDeep / 16%), transparent 45%); box-shadow: inset 0 0 0 1px theme(colors.brand.gold / 35%); }
+  .level-4::after { content: '🦋'; position: absolute; top: 7rem; right: 6%; font-size: 1.75rem; opacity: .55; filter: sepia(1) saturate(4) hue-rotate(5deg) drop-shadow(0 0 8px theme(colors.brand.gold / 60%)); animation: float 7s ease-in-out infinite; }
+  /* 5 · Crowned — black marble with gold veins, gold light, and a few sparkles. */
+  .level-5 {
+    background:
+      radial-gradient(circle at 18% 12%, theme(colors.brand.goldLight / 70%) 0 1px, transparent 2px),
+      radial-gradient(circle at 72% 22%, theme(colors.brand.goldLight / 70%) 0 1px, transparent 2px),
+      radial-gradient(circle at 88% 9%, theme(colors.white / 70%) 0 1px, transparent 2px),
+      radial-gradient(circle at 50% 0%, theme(colors.brand.gold / 26%), transparent 52%),
+      repeating-linear-gradient(118deg, transparent 0 46px, theme(colors.brand.gold / 7%) 46px 47px, transparent 47px 120px),
+      repeating-linear-gradient(32deg, transparent 0 90px, theme(colors.white / 4%) 90px 91px, transparent 91px 210px),
+      linear-gradient(180deg, #050505, theme(colors.brand.black));
+    box-shadow: inset 0 0 0 1px theme(colors.brand.gold / 45%), inset 0 0 120px -40px theme(colors.brand.gold / 35%);
+  }
+  .level-5::after { content: '🦋'; position: absolute; top: 6rem; right: 7%; font-size: 2rem; opacity: .7; filter: sepia(1) saturate(4) hue-rotate(5deg) drop-shadow(0 0 10px theme(colors.brand.gold / 70%)); animation: float 7s ease-in-out infinite; }
+
+  .level-jewel-lit { filter: drop-shadow(0 0 4px theme(colors.brand.pink / 90%)); }
+  .level-crown-crowned { filter: drop-shadow(0 0 10px theme(colors.brand.gold / 70%)); }
+
+  /* The one-time "you moved up" moment. */
+  .level-up { animation: level-up-in .5s ease-out both; }
+  /* Solid, so the message never mixes with the page behind it. */
+  .level-up-card { background: linear-gradient(135deg, theme(colors.brand.pink / 22%) 0%, transparent 50%, theme(colors.brand.gold / 18%) 100%), theme(colors.brand.surface); border: 1px solid theme(colors.brand.gold / 55%); box-shadow: 0 0 40px -10px theme(colors.brand.gold / 60%), 0 24px 60px -20px theme(colors.black); }
+  .level-butterfly { position: absolute; bottom: -1.5rem; font-size: 1.25rem; filter: sepia(1) saturate(4) hue-rotate(5deg); animation: level-butterfly-fly 3.2s ease-out both; }
+}
+
+@keyframes level-up-in { from { opacity: 0; transform: translateY(-12px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes level-butterfly-fly { 0% { opacity: 0; transform: translateY(0) rotate(-8deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-140px) translateX(24px) rotate(10deg); } }
+
+/* Everyone sees the level; nobody gets motion they asked their device to avoid. */
+@media (prefers-reduced-motion: reduce) {
+  .level-up, .level-butterfly, .level-4::after, .level-5::after, .animate-float, .animate-glow { animation: none !important; }
+  .level-butterfly { display: none; }
+}
+
 @keyframes glow { 0%,100%{box-shadow:0 0 20px theme(colors.brand.gold / 30%)} 50%{box-shadow:0 0 40px theme(colors.brand.pink / 40%)} }
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 .animate-glow { animation:glow 2s ease-in-out infinite; }

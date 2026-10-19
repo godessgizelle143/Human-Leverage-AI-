@@ -10,6 +10,7 @@ import { isStaleBlueprintBuild } from '@/lib/hke/generation/recovery'
 import { answeredCount, parseInterviewMessages, TOTAL_QUESTIONS } from '@/lib/hke/interview'
 import { assembleKnowledge } from '@/lib/hke/knowledge'
 import { buildJourney, currentStage, type JourneyKey } from '@/lib/hke/journey'
+import { levelFor } from '@/lib/hke/levels'
 import { deriveLifecycle } from '@/lib/hke/lifecycle'
 import { listProjectAssets, loadOwnedProject } from '@/lib/hke/projects'
 import { isUuid } from '@/lib/hke/server'
@@ -19,6 +20,8 @@ import ArchiveButton from '@/components/hke/ArchiveButton'
 import AssetStudio from '@/components/hke/AssetStudio'
 import JourneyRail from '@/components/hke/JourneyRail'
 import KnowledgeKitPanel from '@/components/hke/KnowledgeKitPanel'
+import LevelCrown from '@/components/hke/LevelCrown'
+import LevelUpCelebration from '@/components/hke/LevelUpCelebration'
 import RefreshButton from '@/components/hke/RefreshButton'
 import StageSection from '@/components/hke/StageSection'
 import UsagePanel from '@/components/hke/UsagePanel'
@@ -65,12 +68,15 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
   // The same five stages the dashboard shows, so this page reads as one path.
   const journey = buildJourney({ answered, projectId: project.id, blueprint: building ? 'building' : 'ready', stepsDone: planStepsDone, nextStepPath: nextStep?.path, assetsReady: completedAssets })
   const next = currentStage(journey)
+  const level = levelFor(journey)
   const stateOf = (key: JourneyKey) => journey.find((item) => item.key === key)!.state
 
   return (
-    <main className="min-h-screen bg-brand-black text-white">
+    <main className="relative min-h-screen bg-brand-black text-white">
+      <div className={level.backdrop} aria-hidden />
       <AppHeader backHref="/dashboard" backLabel="Dashboard" />
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+      {!archived && <LevelUpCelebration projectId={project.id} level={level} />}
+      <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
@@ -86,6 +92,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { id: s
         {archived && <div className="notice mt-6">This project is archived. Everything is preserved — restore it to keep building.</div>}
 
         <section className="panel-feature mt-8 rounded-3xl p-5 sm:p-8" aria-label="Where this project stands">
+          <LevelCrown level={level} size="lg" showTagline className="mb-7" />
           <JourneyRail stages={journey} />
           {!building && (
             <div className="mt-7 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
