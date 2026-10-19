@@ -107,6 +107,14 @@ describe('pricing export claims', () => {
     }
   })
 
+  it('never promises features the app does not have', () => {
+    for (const plan of plans) {
+      for (const feature of plan.features) {
+        expect(feature).not.toMatch(/api access|white-?label|template|priority support|dedicated support/i)
+      }
+    }
+  })
+
   it('does not label any asset type as a PDF', () => {
     for (const type of ASSET_TYPES) expect(type.label).not.toMatch(/pdf/i)
   })

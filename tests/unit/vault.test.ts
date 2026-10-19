@@ -1,10 +1,9 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import type { Usage } from '@/lib/hke/domain'
-import { canOpenVault, groupVaultAnswers, VAULT_CATEGORIES } from '@/lib/hke/vault'
+import * as vault from '@/lib/hke/vault'
+import { groupVaultAnswers, VAULT_CATEGORIES } from '@/lib/hke/vault'
 import { INTERVIEW_QUESTIONS } from '@/types/interview'
-
-const credit = { used: 0, limit: 15, remaining: 15 }
-const usage = (overrides: Partial<Usage>): Usage => ({ plan: 'professional', planLabel: 'Professional', active: true, trialing: false, periodEnd: null, interviews: credit, builds: credit, ...overrides })
 
 describe('groupVaultAnswers', () => {
   it('places every interview question in exactly one section, in interview order', () => {
@@ -31,16 +30,17 @@ describe('groupVaultAnswers', () => {
   })
 })
 
-describe('canOpenVault', () => {
-  it('opens for paid plans, trials, and the owner', () => {
-    expect(canOpenVault(usage({}))).toBe(true)
-    expect(canOpenVault(usage({ trialing: true }))).toBe(true)
-    expect(canOpenVault(usage({ plan: 'owner', planLabel: 'Owner' }))).toBe(true)
+describe('vault access', () => {
+  // Your own answers are always yours: an ended trial or plan, or no plan at
+  // all, must never lock anyone out of reading their own vault.
+  it('has no plan gate', () => {
+    expect('canOpenVault' in vault).toBe(false)
+    const page = readFileSync(join(process.cwd(), 'app/vault/[interviewId]/page.tsx'), 'utf8')
+    expect(page).not.toMatch(/getUserUsage|usage\??\.active|#plans/)
   })
 
-  it('stays closed after a trial or plan ends, and without a plan', () => {
-    expect(canOpenVault(usage({ active: false, trialing: true }))).toBe(false)
-    expect(canOpenVault(usage({ active: false }))).toBe(false)
-    expect(canOpenVault(null)).toBe(false)
+  it('reads only the signed-in user\'s own interview and project', () => {
+    const page = readFileSync(join(process.cwd(), 'app/vault/[interviewId]/page.tsx'), 'utf8')
+    expect(page.match(/\.eq\('user_id', user\.id\)/g)?.length).toBe(2)
   })
 })

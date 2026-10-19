@@ -23,6 +23,7 @@ export function getStripeClient(): Stripe {
   return stripeClient
 }
 
+// List only what the app actually provides today (see docs/pricing-redesign-plan.md).
 export const PRICING_PLANS = {
   creator: {
     name: 'Creator',
@@ -36,14 +37,14 @@ export const PRICING_PLANS = {
     price: 9700,
     interviews: 15,
     builds: 15,
-    features: ['15 AI interviews/month', '15 content builds/month', 'Print-ready exports (save as PDF) + Markdown', 'Priority support', 'Advanced templates'],
+    features: ['15 AI interviews/month', '15 content builds/month', 'Print-ready exports (save as PDF) + Markdown', 'Email support'],
   },
   business: {
     name: 'Business Pro',
     price: 19700,
     interviews: 25,
     builds: 25,
-    features: ['25 AI interviews/month', '25 content builds/month', 'Print-ready exports (save as PDF) + Markdown', 'Premium templates', 'Dedicated support', 'API access', 'White-label options'],
+    features: ['25 AI interviews/month', '25 content builds/month', 'Print-ready exports (save as PDF) + Markdown', 'Email support'],
   },
 } as const
 

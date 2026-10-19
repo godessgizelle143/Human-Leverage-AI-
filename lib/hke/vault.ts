@@ -1,10 +1,10 @@
 import { INTERVIEW_QUESTIONS, type InterviewQuestion } from '@/types/interview'
-import type { Usage } from './domain'
 import type { InterviewAnswers } from './interview'
 
 /**
- * The Knowledge Vault: a user's interview answers, organized by topic. The
- * interview is free; reading the vault needs an active plan or trial.
+ * The Knowledge Vault: a user's interview answers, organized by topic. Your
+ * own answers are always yours to read — with or without a plan. Only new AI
+ * building (blueprints and assets) needs a plan.
  */
 export const VAULT_CATEGORIES: { key: InterviewQuestion['category']; label: string; summary: string }[] = [
   { key: 'basics', label: 'Basics', summary: 'What you do and what you offer.' },
@@ -27,9 +27,4 @@ export function groupVaultAnswers(answers: InterviewAnswers): VaultSection[] {
     }))
     return { ...category, entries, answered: entries.filter((entry) => entry.answer).length }
   })
-}
-
-/** Trial and paid plans both open the vault; an ended trial or plan does not. */
-export function canOpenVault(usage: Usage | null) {
-  return !!usage?.active
 }

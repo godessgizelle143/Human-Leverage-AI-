@@ -1,10 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { getUserUsage } from '@/lib/hke/access'
 import { answeredCount, parseInterviewMessages, TOTAL_QUESTIONS, titleFromAnswers } from '@/lib/hke/interview'
 import { isUuid } from '@/lib/hke/server'
-import { canOpenVault, groupVaultAnswers } from '@/lib/hke/vault'
+import { groupVaultAnswers } from '@/lib/hke/vault'
 import AppHeader from '@/components/hke/AppHeader'
 import { ProgressMeter } from '@/components/hke/LifecycleBadge'
 import RefreshOnReturn from '@/components/hke/RefreshOnReturn'
@@ -17,10 +16,8 @@ export default async function KnowledgeVaultPage({ params }: { params: { intervi
   if (!user) redirect('/login')
   if (!isUuid(params.interviewId)) redirect('/dashboard')
 
-  // The interview is free; the vault is what a plan or trial pays for.
-  const { usage } = await getUserUsage(supabase, user)
-  if (!canOpenVault(usage)) redirect('/dashboard#plans')
-
+  // Your own answers are always yours to read, with or without a plan. Both
+  // queries are scoped to the signed-in user, so nobody can read anyone else's.
   const [{ data: interview, error: interviewError }, { data: project }] = await Promise.all([
     supabase.from('interviews').select('id, title, messages, updated_at').eq('id', params.interviewId).eq('user_id', user.id).maybeSingle(),
     supabase.from('projects').select('id').eq('interview_id', params.interviewId).eq('user_id', user.id).maybeSingle(),
