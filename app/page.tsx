@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, Clock, Heart, Leaf, MessageCircle } from 'lucide-react'
 import { PRICING_PLANS, type PlanKey } from '@/lib/stripe/client'
 import { assetCategoryLabel, ASSET_TYPES } from '@/lib/hke/assets'
 import { TOTAL_QUESTIONS } from '@/lib/hke/interview'
@@ -17,6 +17,16 @@ const STAGE_COPY: Record<JourneyKey, string> = {
   assets: `Generate any of ${ASSET_TYPES.length} asset types from your own knowledge. Edit them, regenerate new versions, and export each one.`,
   kit: 'Download everything as one print-ready document: blueprint, plan, and the latest version of every asset.',
 }
+
+// "Made for you" promises. Each one must stay true to what the product does today:
+// finished writing from plain answers, skip/return with autosave, more projects and
+// asset types, and the no-invented-facts grounding rule in lib/hke/intelligence/prompts.ts.
+const MADE_FOR_YOU = [
+  { icon: MessageCircle, title: 'Your words are enough', body: 'Answer in everyday language. No need to sound polished — HKE AI turns your answers into finished writing in your voice.' },
+  { icon: Clock, title: 'Your pace, your way', body: 'Skip any question and come back any time. Every answer saves as you type.' },
+  { icon: Leaf, title: 'Grows with you', body: `Start with one project. When you’re ready, add more projects and build any of the ${ASSET_TYPES.length} asset types.` },
+  { icon: Heart, title: 'Honest by design', body: 'HKE AI only uses what you tell it. It never makes up testimonials, numbers, or results.' },
+]
 
 // Illustration only: a generic example of the three steps. It describes no real project.
 const EXAMPLE = {
@@ -106,7 +116,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
             <p className="eyebrow flex items-center gap-2.5"><span className="status-dot" aria-hidden />How it works</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl"><span className="accent-word">One path</span>, from what you know to <span className="gradient-text">what you can hand over.</span></h2>
+            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl"><span className="accent-word">One path</span>, from what you know to <span className="gradient-text">what&apos;s yours to build, share, and sell.</span></h2>
             <p className="mt-5 text-lg leading-8 text-white/55">Every project follows the same five stages. You always know where you are and what comes next.</p>
           </div>
           <ol className="mt-14 grid gap-x-6 gap-y-10 md:grid-cols-5">
@@ -122,6 +132,26 @@ export default function LandingPage() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      <section id="made-for-you" className="relative scroll-mt-20 px-5 py-20 sm:px-8 lg:py-28">
+        <div className="backdrop-spot absolute inset-0" aria-hidden="true" />
+        <div className="relative mx-auto max-w-7xl">
+          <div className="max-w-3xl">
+            <p className="eyebrow eyebrow-pink">Made for you</p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">There&apos;s potential in every one of us. <span className="gradient-text">HKE meets you right where you stand.</span></h2>
+            <p className="mt-5 text-lg leading-8 text-white/60">Everyone learns, thinks, and builds differently — what works for one person may not work for the next. So HKE AI doesn&apos;t ask you to fit a mold. It starts where you are and walks with you, one step at a time, until you&apos;re moving on your own.</p>
+          </div>
+          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {MADE_FOR_YOU.map(({ icon: Icon, title, body }) => (
+              <li key={title} className="glass glass-hover rounded-2xl p-6">
+                <Icon className="h-6 w-6 text-brand-gold" aria-hidden />
+                <h3 className="mt-4 text-lg font-bold">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">{body}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

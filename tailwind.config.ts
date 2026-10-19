@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss'
-import { BRAND, BRAND_GRADIENT } from './lib/brand'
+import { BRAND, BRAND_GRADIENT, GOLD_GRADIENT } from './lib/brand'
 
 const config: Config = {
   content: [
@@ -18,10 +18,11 @@ const config: Config = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-brand': BRAND_GRADIENT,
+        'gradient-gold': GOLD_GRADIENT,
       },
       boxShadow: {
-        'glow-pink': `0 10px 40px -8px ${BRAND.pink}73`,
-        'glow-gold': `0 0 24px -6px ${BRAND.gold}59`,
+        'glow-pink': `0 0 18px ${BRAND.pink}99, 0 10px 48px -6px ${BRAND.pink}80`,
+        'glow-gold': `0 0 28px -4px ${BRAND.gold}80`,
       },
       animation: {
         glow: 'glow 2s ease-in-out infinite alternate',
