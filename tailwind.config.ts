@@ -15,6 +15,12 @@ const config: Config = {
         paper: '#f4efe4',
         ink: '#171512',
       },
+      fontFamily: {
+        // Titles only — body text stays Inter so everything is easy to read.
+        display: ['var(--font-display)', 'Georgia', 'serif'],
+        // A few accent words only, never full sentences.
+        script: ['var(--font-script)', 'cursive'],
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-brand': BRAND_GRADIENT,

@@ -62,7 +62,7 @@ export default function LandingPage() {
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1fr_1fr]">
           <div className="max-w-2xl">
             <p className="eyebrow mb-5 flex items-center gap-2.5"><span className="status-dot" aria-hidden />Human Knowledge Engine AI</p>
-            <h1 className="text-5xl font-black leading-[.96] tracking-[-.04em] sm:text-6xl lg:text-7xl"><span className="accent-glow">Speak Once<span className="accent-dot">.</span></span><br /><span className="gradient-text">Build Forever.</span></h1>
+            <h1 className="leading-[1.05]"><span className="gold-text block font-display text-5xl font-bold tracking-[.02em] sm:text-6xl lg:text-7xl">Speak Once<span className="accent-dot">.</span></span><span className="neon-pink mt-1 block font-script text-6xl font-normal sm:text-7xl lg:text-8xl">Build Forever.</span></h1>
             <p className="mt-7 text-lg leading-8 text-white/65 sm:text-xl">Tell HKE AI what you know in one guided interview. It structures your expertise into a <span className="accent-underline">blueprint</span>, then builds the products and marketing assets your business needs — all from your own words.</p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link href="/register" className="btn-primary cta-edge gap-2 text-base">Start Free 3-Day Trial <ArrowRight className="h-4 w-4" /></Link>

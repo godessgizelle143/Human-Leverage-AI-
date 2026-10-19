@@ -13,8 +13,8 @@ export default function BrandMark({ size = 'md', wordmark = true, wordmarkClassN
       <span className={clsx('brand-mark shrink-0', SIZES[size].mark)} aria-hidden={wordmark}>HKE</span>
       {wordmark && (
         <span className={clsx('font-bold tracking-tight', SIZES[size].word, wordmarkClassName)}>
-          HKE <span className="gradient-text">AI</span>
-          {tagline && <span className="ml-2 hidden text-xs font-medium uppercase tracking-[.18em] text-brand-gold/80 lg:inline">Human Knowledge Engine</span>}
+          HKE <span className="neon-pink font-script text-[1.15em] font-normal">AI</span>
+          {tagline && <span className="gold-text ml-2 hidden font-display text-xs font-bold uppercase tracking-[.18em] lg:inline">Human Knowledge Engine</span>}
         </span>
       )}
     </span>
