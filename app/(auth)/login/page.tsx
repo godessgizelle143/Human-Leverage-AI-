@@ -128,6 +128,7 @@ export default function LoginPage() {
         </div>
 
         <div className="glass rounded-2xl p-8">
+          <p className="mb-5 text-sm text-white/60">Sign in with your HKE email and password.</p>
           {error && (
             <div role="alert" className="notice notice-error mb-4">
               {error}
@@ -195,15 +196,17 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="my-6 text-center text-white/40">OR</div>
-
-          <button
-            onClick={handleGoogleLogin}
-            disabled={googleLoading}
-            className="btn-secondary w-full py-3"
-          >
-            {googleLoading ? 'Connecting...' : 'Continue with Google'}
-          </button>
+          <p className="mt-6 text-center text-sm text-white/50">
+            Signed up with Google before?{' '}
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={googleLoading}
+              className="link-action disabled:opacity-60"
+            >
+              {googleLoading ? 'Connecting...' : 'Continue with Google'}
+            </button>
+          </p>
 
           <p className="text-center text-white/50 text-sm mt-6">
             Don&apos;t have an account?{' '}
