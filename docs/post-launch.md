@@ -18,3 +18,11 @@ exists), because it is never told the interview's status.
   build, and the page redirects once a build exists, so it shows only after a
   build was cut off or refused.
 - Held on 2026-10-22: not applied, by decision.
+
+## More held items
+
+- Align the old 5 levels on project/interview pages with the new jewels.
+- Restyle the Plans section to match Crown (visual only, checkout untouched).
+- Replace the "HKE AI" logo on login/register/homepage/browser tab with HKE.
+- Replace the 🦋 emoji and drawn crown with sharp PNG art.
+- Theme picker ("Crown" + a second sleeker theme).
