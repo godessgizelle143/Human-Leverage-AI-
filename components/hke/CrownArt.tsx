@@ -5,11 +5,12 @@ import { BRAND } from '@/lib/brand'
 const JEWELS = [18, 39, 60, 81, 102]
 
 /**
- * The HKE crown drawing: a gold crown with five jewels on its band. The first
- * `lit` jewels glow; the one at `current` is hot pink. `filled` makes the crown
- * solid gold. Colors come from lib/brand.ts. Decorative unless `label` is given.
+ * The HKE crown drawing: a gold crown with five jewels on its band. `lit` is
+ * either how many jewels glow from the left, or one flag per jewel (for jewels
+ * earned out of order); the one at `current` is hot pink. `filled` makes the
+ * crown solid gold. Colors come from lib/brand.ts. Decorative unless `label` is given.
  */
-export default function CrownArt({ lit, current, filled = false, label, className }: { lit: number; current?: number; filled?: boolean; label?: string; className?: string }) {
+export default function CrownArt({ lit, current, filled = false, label, className }: { lit: number | boolean[]; current?: number; filled?: boolean; label?: string; className?: string }) {
   return (
     <svg viewBox="0 0 120 80" className={clsx('shrink-0 overflow-visible', className)} role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true}>
       <defs>
@@ -30,7 +31,7 @@ export default function CrownArt({ lit, current, filled = false, label, classNam
       />
       <rect x="6" y="62" width="108" height="12" rx="3" fill="url(#hke-crown-gold)" />
       {JEWELS.map((x, index) => {
-        const on = index < lit
+        const on = Array.isArray(lit) ? !!lit[index] : index < lit
         return (
           <circle
             key={x}

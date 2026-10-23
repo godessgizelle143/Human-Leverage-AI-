@@ -27,7 +27,7 @@ export const BRAND = {
   raised: '#2A2218',
   line: '#6B5A36',
   lineSoft: '#3A3024',
-  pink: '#FF4FA3',
+  pink: '#FF2E93',
   gold: '#E2B84A',
   goldSoft: '#E8C766',
   goldPale: '#F5DC8E',

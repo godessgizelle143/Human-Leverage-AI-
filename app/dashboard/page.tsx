@@ -5,16 +5,18 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { PRICING_PLANS, type PlanKey } from '@/lib/stripe/client'
 import { dashboardNotice } from '@/lib/auth/messages'
 import { getUserUsage } from '@/lib/hke/access'
-import { type AssetSummary } from '@/lib/hke/assets'
+import { assetTypeLabel, displayStatus, type AssetSummary } from '@/lib/hke/assets'
 import { stepEntries } from '@/lib/hke/blueprint'
 import { ASSET_SUMMARY_COLUMNS, type ProjectRow } from '@/lib/hke/db'
 import { canGenerateBlueprint } from '@/lib/hke/entitlements'
 import { answeredCount, parseInterviewMessages, TOTAL_QUESTIONS } from '@/lib/hke/interview'
+import { crownFor } from '@/lib/hke/jewels'
 import { buildJourney, currentStage, JOURNEY_KEYS, JOURNEY_LABELS } from '@/lib/hke/journey'
 import { deriveLifecycle } from '@/lib/hke/lifecycle'
 import { STEP_SECTIONS } from '@/lib/hke/steps'
 import AppHeader from '@/components/hke/AppHeader'
 import ArchiveButton from '@/components/hke/ArchiveButton'
+import CrownCard from '@/components/hke/CrownCard'
 import NewProjectButton from '@/components/hke/NewProjectButton'
 import RefreshButton from '@/components/hke/RefreshButton'
 import UsagePanel from '@/components/hke/UsagePanel'
@@ -95,7 +97,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     .map((interview) => {
       const state = parseInterviewMessages(interview.messages)
       const answered = answeredCount(state.answers)
-      return { ...interview, stage: deriveLifecycle(interview, null), answered, journey: buildJourney({ answered, interviewId: interview.id, blueprint: 'none' }) }
+      return { ...interview, stage: deriveLifecycle(interview, null), answered, journey: buildJourney({ answered, interviewId: interview.id, blueprint: 'none', interviewDone: interview.status === 'completed' }) }
     })
 
   const activeDrafts = drafts.filter((draft) => draft.stage !== 'archived')
@@ -104,6 +106,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     ...projects.filter((project) => project.stage === 'archived').map((project) => ({ kind: 'project' as const, id: project.id, title: project.title, href: `/projects/${project.id}` })),
     ...drafts.filter((draft) => draft.stage === 'archived').map((draft) => ({ kind: 'interview' as const, id: draft.id, title: draft.title, href: `/builder?interview=${draft.id}` })),
   ]
+  const recentAssets = activeProjects
+    .flatMap((project) => project.assets.filter((asset) => asset.status === 'completed').map((asset) => ({ ...asset, projectTitle: project.title })))
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+    .slice(0, 6)
   const trialEnded = !!usage && !usage.active
 
   // One list of everything in progress, newest first. A project's next action
@@ -225,6 +231,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           </ol>
         </section>
 
+        <CrownCard crown={crownFor(path)} className="mb-10" />
+
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="min-w-0 space-y-10">
             {spotlight ? (
@@ -277,6 +285,26 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 <p className="dash-card p-5 text-brand-body">{loadFailed ? 'Your interviews could not be loaded. See the message above.' : 'No saved interviews yet. Start one and it will show up here.'}</p>
               )}
             </section>
+
+            {recentAssets.length > 0 && (
+              <section aria-labelledby="assets-title">
+                <h2 id="assets-title" className="dash-section-title mb-5">Recent assets</h2>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {recentAssets.map((asset) => (
+                    <li key={asset.id}>
+                      <Link href={`/projects/${asset.project_id}/assets/${asset.id}`} className="dash-card card-link flex h-full items-start gap-4 p-4">
+                        <span className="paper grid h-14 w-11 shrink-0 place-items-center text-[9px] font-black" aria-hidden>HKE</span>
+                        <span className="min-w-0">
+                          <span className="block text-xs font-semibold uppercase tracking-wide text-brand-goldSoft">{assetTypeLabel(asset.asset_type)}{asset.version > 1 ? ` · v${asset.version}` : ''}</span>
+                          <span className="mt-1 block break-words font-semibold leading-snug text-brand-text">{asset.title}</span>
+                          <span className="mt-1 flex items-center gap-1.5 text-xs text-brand-muted"><span className="status-dot" aria-hidden />{asset.projectTitle}{displayStatus(asset) === 'completed' ? ` · ${new Date(asset.updated_at).toLocaleDateString()}` : ''}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {archived.length > 0 && (
               <details className="dash-card p-5">

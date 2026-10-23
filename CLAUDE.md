@@ -11,7 +11,7 @@ Next.js 14, Supabase, Vercel, Stripe, OpenAI. Package manager: pnpm.
 ## Brand
 From the approved "Crown" dashboard design. Every color and font role lives in lib/brand.ts — no raw colors in pages.
 Warm black #0B0A09 (cards #16130F, borders #6B5A36), warm white text #F3EEE6,
-gold #E2B84A (buttons, fills) and #E8C766 (headings, links), hot pink #FF4FA3 (current step, script accents).
+gold #E2B84A (buttons, fills) and #E8C766 (headings, links), hot pink #FF2E93 (current step, script accents).
 No turquoise (the legacy turquoise tokens hold champagne gold).
 Fonts: Inter for body, Cinzel for titles, Yellowtail script for a few accent words.
 

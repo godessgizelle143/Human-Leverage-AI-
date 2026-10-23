@@ -24,6 +24,8 @@ export type JourneyInput = {
   projectId?: string | null
   /** 'none' while there is no project; 'building' until the blueprint is saved. */
   blueprint: 'none' | 'building' | 'ready'
+  /** The interview was marked finished (interviews.status = 'completed'). */
+  interviewDone?: boolean
   stepsDone?: number
   /** Path of the first unfinished launch-plan step, when there is one. */
   nextStepPath?: string | null
@@ -36,17 +38,21 @@ export function buildJourney(input: JourneyInput): JourneyStage[] {
   const ready = blueprint === 'ready'
   const totalSteps = STEP_SECTIONS.length
 
+  const captured = blueprint !== 'none' || !!input.interviewDone
+  const planned = ready && stepsDone >= totalSteps
+  const built = ready && assetsReady > 0
   const done: Record<JourneyKey, boolean> = {
-    capture: blueprint !== 'none',
+    capture: captured,
     blueprint: ready,
-    plan: ready && stepsDone >= totalSteps,
-    assets: ready && assetsReady > 0,
-    // The kit is never "finished": it grows with every asset.
-    kit: false,
+    plan: planned,
+    assets: built,
+    // The kit keeps growing with every asset, but it counts as done once it
+    // holds everything: the interview, the blueprint, the full plan, and an asset.
+    kit: captured && ready && planned && built,
   }
   const detail: Record<JourneyKey, string> = {
     capture: `${answered} of ${TOTAL_QUESTIONS} answered`,
-    blueprint: ready ? 'Ready' : blueprint === 'building' ? 'Building…' : 'After the interview',
+    blueprint: ready ? 'Ready' : blueprint === 'building' ? 'Building…' : captured ? 'Ready to build' : 'After the interview',
     plan: ready ? `${stepsDone} of ${totalSteps} steps` : 'After the blueprint',
     assets: ready ? (assetsReady ? `${assetsReady} ready` : 'None yet') : 'After the blueprint',
     kit: done.assets ? 'Ready to download' : 'After your first asset',

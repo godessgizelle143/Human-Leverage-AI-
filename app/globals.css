@@ -113,6 +113,11 @@
   .path-dot { display: grid; height: 2.25rem; width: 2.25rem; flex-shrink: 0; place-items: center; border-radius: 9999px; border: 1px solid theme(colors.brand.line); font-size: .875rem; font-weight: 600; color: theme(colors.brand.body); }
   .path-dot-done { border-color: theme(colors.brand.gold); background: theme(colors.brand.gold); color: theme(colors.brand.black); }
   .path-dot-current { border: 2px solid theme(colors.brand.pink); color: theme(colors.brand.text); }
+  /* The crown card's jewels: earned ones are hot pink and glow; the next one waits in gold. */
+  .gem { display: block; height: 1.5rem; width: 1.5rem; transform: rotate(45deg); border-radius: .25rem; border: 1.5px solid theme(colors.brand.line); background: transparent; }
+  .gem-earned { border-color: theme(colors.brand.pink); background: theme(colors.brand.pink); box-shadow: 0 0 14px theme(colors.brand.pink / 70%); }
+  .gem-next { border-color: theme(colors.brand.gold); box-shadow: 0 0 10px -2px theme(colors.brand.gold / 60%); }
+  .crown-butterfly { position: absolute; font-size: 1.25rem; filter: sepia(1) saturate(4) hue-rotate(5deg) drop-shadow(0 0 6px theme(colors.brand.gold / 60%)); opacity: .8; }
   .dash-progress { height: .625rem; overflow: hidden; border-radius: 9999px; background: theme(colors.brand.raised); }
   .dash-progress-fill { height: 100%; border-radius: 9999px; background: theme(colors.brand.gold); transition: width .3s; }
 
