@@ -9,8 +9,11 @@ Current priority: Knowledge Vault v1 — simple, shippable, paid.
 Next.js 14, Supabase, Vercel, Stripe, OpenAI. Package manager: pnpm.
 
 ## Brand
-Black #070707, white, hot pink #FF1493, gold #D4AF37, turquoise #20D9D2 (sparing accent).
-Inter font. Glassmorphism style.
+From the approved "Crown" dashboard design. Every color and font role lives in lib/brand.ts — no raw colors in pages.
+Warm black #0B0A09 (cards #16130F, borders #6B5A36), warm white text #F3EEE6,
+gold #E2B84A (buttons, fills) and #E8C766 (headings, links), hot pink #FF4FA3 (current step, script accents).
+No turquoise (the legacy turquoise tokens hold champagne gold).
+Fonts: Inter for body, Cinzel for titles, Yellowtail script for a few accent words.
 
 ## How we work (mandatory)
 1. Before any code: show a short plan — files to change, why, and risks. Wait for approval.

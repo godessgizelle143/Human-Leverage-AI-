@@ -1,33 +1,7 @@
 import type { Metadata } from 'next'
-import { Cinzel, Fraunces, Inter, Yellowtail } from 'next/font/google'
 import './globals.css'
 import { DEMO_WRITE_MESSAGE, isDemoMode } from '@/lib/demo/mode'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-})
-
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  variable: '--font-fraunces',
-  display: 'swap',
-})
-
-// Banner lettering: carved Roman capitals for titles, neon script for a few accent words.
-const cinzel = Cinzel({
-  subsets: ['latin'],
-  weight: ['600', '700', '800'],
-  variable: '--font-display',
-  display: 'swap',
-})
-
-const yellowtail = Yellowtail({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-script',
-  display: 'swap',
-})
+import { bodyFontClass, fontVariables } from '@/lib/fonts'
 
 export const metadata: Metadata = {
   title: 'Human Knowledge Engine AI (HKE AI) — Speak Once. Build Forever.',
@@ -46,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable} ${cinzel.variable} ${yellowtail.variable}`}>
-      <body className={inter.className}>
+    <html lang="en" className={fontVariables}>
+      <body className={bodyFontClass}>
         {isDemoMode() && <div role="status" className="demo-banner">{DEMO_WRITE_MESSAGE}</div>}
         {children}
       </body>

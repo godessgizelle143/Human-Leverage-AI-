@@ -12,7 +12,7 @@ export type JourneyStage = { key: JourneyKey; label: string; summary: string; de
 
 export const JOURNEY_LABELS: Record<JourneyKey, { label: string; summary: string }> = {
   capture: { label: 'Capture', summary: 'Your expertise, in your words' },
-  blueprint: { label: 'Blueprint', summary: 'Structured by HKE AI' },
+  blueprint: { label: 'Blueprint', summary: 'Structured by HKE' },
   plan: { label: 'Launch plan', summary: 'Four decisions to launch' },
   assets: { label: 'Assets', summary: 'Built from your knowledge' },
   kit: { label: 'Knowledge Kit', summary: 'Everything in one document' },

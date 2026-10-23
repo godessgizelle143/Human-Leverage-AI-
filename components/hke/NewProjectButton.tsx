@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import clsx from 'clsx'
 
+const VARIANTS = { primary: 'btn-primary', gold: 'btn-gold' }
+
 /** Creates a saved draft project, then opens its interview. */
-export default function NewProjectButton({ className, label = 'Start a New Project' }: { className?: string; label?: string }) {
+export default function NewProjectButton({ className, label = 'Start a New Project', variant = 'primary' }: { className?: string; label?: string; variant?: keyof typeof VARIANTS }) {
   const router = useRouter()
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
@@ -26,7 +28,7 @@ export default function NewProjectButton({ className, label = 'Start a New Proje
 
   return (
     <div className="flex flex-col gap-2">
-      <button type="button" onClick={createProject} disabled={creating} className={clsx('btn-primary justify-center disabled:opacity-60', className)}>
+      <button type="button" onClick={createProject} disabled={creating} className={clsx(VARIANTS[variant], 'justify-center disabled:opacity-60', className)}>
         {creating ? 'Creating project…' : label}
       </button>
       {error && <p className="text-sm text-red-300">{error}</p>}

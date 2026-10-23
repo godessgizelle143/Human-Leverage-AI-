@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss'
-import { BRAND, BRAND_GRADIENT, GOLD_GRADIENT } from './lib/brand'
+import { BRAND, BRAND_FONTS, BRAND_GRADIENT, GOLD_GRADIENT } from './lib/brand'
 
 const config: Config = {
   content: [
@@ -11,15 +11,13 @@ const config: Config = {
     extend: {
       colors: {
         brand: { ...BRAND },
-        brass: '#a47b32',
-        paper: '#f4efe4',
-        ink: '#171512',
       },
       fontFamily: {
+        body: [...BRAND_FONTS.body],
         // Titles only — body text stays Inter so everything is easy to read.
-        display: ['var(--font-display)', 'Georgia', 'serif'],
+        display: [...BRAND_FONTS.display],
         // A few accent words only, never full sentences.
-        script: ['var(--font-script)', 'cursive'],
+        script: [...BRAND_FONTS.script],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

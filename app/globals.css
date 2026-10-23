@@ -13,7 +13,7 @@
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { margin: 0; background: theme(colors.brand.black); color: theme(colors.brand.white); font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: theme(colors.brand.black); color: theme(colors.brand.white); font-family: theme(fontFamily.body); -webkit-font-smoothing: antialiased; }
   ::selection { background: theme(colors.brand.pink / 40%); color: theme(colors.brand.white); }
   :focus-visible { outline: 2px solid theme(colors.brand.pink); outline-offset: 2px; }
   ::-webkit-scrollbar { width: 7px; }
@@ -92,6 +92,29 @@
   /* A sheet of the printed deliverable, shown small. */
   .paper { background: theme(colors.brand.white); color: theme(colors.brand.black); border-top: 4px solid theme(colors.brand.pink); border-radius: .375rem; box-shadow: 0 24px 60px -20px theme(colors.black), 0 0 0 1px theme(colors.white / 10%); }
   .demo-banner { position: relative; z-index: 60; border-bottom: 1px solid theme(colors.brand.gold / 40%); background: theme(colors.brand.gold); color: theme(colors.brand.black); padding: .375rem 1rem; text-align: center; font-size: .75rem; font-weight: 700; }
+
+  /* Crown dashboard (Phase A look): warm black cards, flat gold actions, hot-pink "you are here". */
+  .dash-card { border-radius: 1rem; border: 1px solid theme(colors.brand.line); background: theme(colors.brand.surface); }
+  .dash-title { font-family: theme(fontFamily.display); font-weight: 700; color: theme(colors.brand.goldSoft); letter-spacing: .02em; }
+  .dash-section-title { font-family: theme(fontFamily.display); font-size: 1.25rem; line-height: 1.75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: theme(colors.brand.goldSoft); }
+  .btn-gold { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; background: theme(colors.brand.gold); color: theme(colors.brand.black); font-weight: 700; padding: .75rem 1.5rem; border-radius: .75rem; transition: filter .2s, box-shadow .2s; }
+  .btn-gold:hover:not(:disabled) { filter: brightness(1.08); box-shadow: theme(boxShadow.glow-gold); }
+  .btn-gold-outline { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border: 1px solid theme(colors.brand.line); color: theme(colors.brand.goldSoft); font-weight: 600; padding: .75rem 1.5rem; border-radius: .75rem; transition: border-color .2s, color .2s; }
+  .btn-gold-outline:hover { border-color: theme(colors.brand.gold); color: theme(colors.brand.goldPale); }
+  .btn-gold:disabled { cursor: not-allowed; }
+  .link-gold { font-weight: 600; color: theme(colors.brand.goldSoft); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+  .link-gold:hover { color: theme(colors.brand.goldPale); }
+  .chip-plan { display: inline-flex; align-items: center; border-radius: 9999px; border: 1px solid theme(colors.brand.lineSoft); padding: .5rem 1rem; font-size: .875rem; color: theme(colors.brand.body); white-space: nowrap; }
+  /* "Your path" steps: gold check when done, pink ring on the current step. */
+  .path-step { display: flex; height: 100%; border-radius: 1rem; border: 1px solid theme(colors.brand.line); background: theme(colors.brand.surface); padding: 1rem 1.25rem; transition: border-color .2s; }
+  .path-step-current { border-color: theme(colors.brand.pink); box-shadow: 0 0 24px -12px theme(colors.brand.pink); }
+  a.path-step:hover { border-color: theme(colors.brand.gold); }
+  a.path-step-current:hover { border-color: theme(colors.brand.pink); }
+  .path-dot { display: grid; height: 2.25rem; width: 2.25rem; flex-shrink: 0; place-items: center; border-radius: 9999px; border: 1px solid theme(colors.brand.line); font-size: .875rem; font-weight: 600; color: theme(colors.brand.body); }
+  .path-dot-done { border-color: theme(colors.brand.gold); background: theme(colors.brand.gold); color: theme(colors.brand.black); }
+  .path-dot-current { border: 2px solid theme(colors.brand.pink); color: theme(colors.brand.text); }
+  .dash-progress { height: .625rem; overflow: hidden; border-radius: 9999px; background: theme(colors.brand.raised); }
+  .dash-progress-fill { height: 100%; border-radius: 9999px; background: theme(colors.brand.gold); transition: width .3s; }
 
   /* Small status and knowledge-flow marks. The `turquoise` tokens now hold champagne gold (see lib/brand.ts). */
   .status-dot { display: inline-block; height: .375rem; width: .375rem; flex-shrink: 0; border-radius: 9999px; background: theme(colors.brand.turquoise); box-shadow: 0 0 8px theme(colors.brand.turquoise / 70%); }

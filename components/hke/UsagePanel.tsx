@@ -13,9 +13,9 @@ function percent(credit: CreditUsage) {
 export default function UsagePanel({ usage, compact = false }: { usage: Usage | null; compact?: boolean }) {
   if (!usage) {
     return (
-      <section className="glass rounded-2xl p-6">
-        <h2 className="text-xl font-semibold mb-2">Choose your plan</h2>
-        <p className="text-white/60">Start your 3-day free trial with no credit card required.</p>
+      <section className="dash-card p-6">
+        <h2 className="dash-title mb-2 text-xl">Choose your plan</h2>
+        <p className="text-brand-body">Start your 3-day free trial with no credit card required.</p>
       </section>
     )
   }
@@ -24,19 +24,19 @@ export default function UsagePanel({ usage, compact = false }: { usage: Usage | 
   const periodEnd = usage.periodEnd ? new Date(usage.periodEnd) : null
 
   return (
-    <section className={compact ? 'surface-inset rounded-xl p-4' : 'glass rounded-2xl p-6'}>
+    <section className={compact ? 'surface-inset rounded-xl p-4' : 'dash-card p-6'}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className={compact ? 'text-sm font-semibold' : 'text-xl font-semibold'}>Generation capacity</h2>
-          <p className="mt-1 text-sm text-white/60">{status}</p>
+          <h2 className={compact ? 'text-sm font-semibold' : 'dash-title text-xl'}>{compact ? 'Generation capacity' : 'Your credits'}</h2>
+          <p className="mt-1 text-sm text-brand-body">{status}</p>
         </div>
-        {periodEnd && usage.active && <p className="text-xs text-white/40 text-right">{usage.trialing ? 'Trial ends' : 'Renews'}<br />{periodEnd.toLocaleDateString()}</p>}
+        {periodEnd && usage.active && <p className="text-xs text-brand-faint text-right">{usage.trialing ? 'Trial ends' : 'Renews'}<br />{periodEnd.toLocaleDateString()}</p>}
       </div>
       <div className="mt-4 space-y-3">
         <ProgressMeter value={percent(usage.interviews)} label={`Blueprints · ${creditLabel(usage.interviews)}`} showValue={usage.interviews.limit !== null} />
         <ProgressMeter value={percent(usage.builds)} label={`Build credits · ${creditLabel(usage.builds)}`} showValue={usage.builds.limit !== null} />
       </div>
-      <p className="mt-3 text-xs text-white/40">A blueprint uses 1 blueprint + 1 build credit. Each generated asset uses 1 build credit. Failed generations are refunded.</p>
+      <p className="mt-3 text-xs text-brand-faint">A blueprint uses 1 blueprint + 1 build credit. Each generated asset uses 1 build credit. Failed generations are refunded.</p>
     </section>
   )
 }
