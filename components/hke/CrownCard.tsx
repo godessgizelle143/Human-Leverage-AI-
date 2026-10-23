@@ -7,13 +7,12 @@ import CrownArt from './CrownArt'
  * with a script line naming the next one. Full width, under the path.
  */
 export default function CrownCard({ crown, className }: { crown: Crown; className?: string }) {
-  const lastEarned = crown.jewels.map((jewel) => jewel.earned).lastIndexOf(true)
   return (
     <section className={clsx('dash-card relative overflow-hidden p-6 sm:p-8', className)} aria-labelledby="crown-title">
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-10">
         <div className="relative flex shrink-0 items-center gap-5">
           <span className="relative">
-            <CrownArt lit={crown.jewels.map((jewel) => jewel.earned)} current={lastEarned} filled={crown.next === null} className="h-20 w-[120px]" />
+            <CrownArt lit={crown.jewels.map((jewel) => jewel.earned)} filled={crown.next === null} className="h-20 w-[120px]" />
             <span className="crown-butterfly -right-4 -top-3" aria-hidden>🦋</span>
           </span>
           <div className="md:hidden">

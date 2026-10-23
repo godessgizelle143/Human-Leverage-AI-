@@ -6,8 +6,8 @@ const JEWELS = [18, 39, 60, 81, 102]
 
 /**
  * The HKE crown drawing: a gold crown with five jewels on its band. `lit` is
- * either how many jewels glow from the left, or one flag per jewel (for jewels
- * earned out of order); the one at `current` is hot pink. `filled` makes the
+ * either how many jewels glow from the left (the one at `current` is hot pink),
+ * or one flag per jewel for earned jewels (all hot pink, like the gems). `filled` makes the
  * crown solid gold. Colors come from lib/brand.ts. Decorative unless `label` is given.
  */
 export default function CrownArt({ lit, current, filled = false, label, className }: { lit: number | boolean[]; current?: number; filled?: boolean; label?: string; className?: string }) {
@@ -39,7 +39,7 @@ export default function CrownArt({ lit, current, filled = false, label, classNam
             cy="68"
             r="4.5"
             className={on ? 'level-jewel-lit' : undefined}
-            fill={on ? (index === current ? BRAND.pink : BRAND.goldLight) : BRAND.raised}
+            fill={on ? (Array.isArray(lit) || index === current ? BRAND.pink : BRAND.goldLight) : BRAND.raised}
             stroke={on ? BRAND.white : BRAND.line}
             strokeWidth="1"
           />
