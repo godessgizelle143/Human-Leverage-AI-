@@ -87,7 +87,7 @@ export async function POST(request: Request) {
             {
               price_data: {
                 currency: 'usd',
-                product_data: { name: `HKE AI ${selectedPlan.name}` },
+                product_data: { name: `HKE ${selectedPlan.name}` },
                 unit_amount: selectedPlan.price,
                 recurring: { interval: 'month' },
               },
