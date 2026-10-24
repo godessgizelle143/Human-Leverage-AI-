@@ -9,9 +9,9 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <BrandMark size="sm" wordmark={false} />
-              <span className="font-bold gradient-text">Human Knowledge Engine AI</span>
+              <span className="font-bold gradient-text">The Human Knowledge Engine</span>
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-gold/80 mb-3">HKE AI</p>
+            <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-gold/80 mb-3">HKE</p>
             <p className="text-sm text-white/40 leading-relaxed">
               Transform a single conversation into a complete digital business.
             </p>
@@ -20,9 +20,9 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-3 text-sm">Product</h4>
             <ul className="space-y-2 text-sm text-white/40">
-              <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-              <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-              <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
+              <li><a href="/#features" className="hover:text-white transition-colors">Features</a></li>
+              <li><a href="/#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
             </ul>
           </div>
 
@@ -30,24 +30,22 @@ export default function Footer() {
             <h4 className="font-semibold mb-3 text-sm">Company</h4>
             <ul className="space-y-2 text-sm text-white/40">
               <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-3 text-sm">Legal</h4>
             <ul className="space-y-2 text-sm text-white/40">
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Refund Policy</a></li>
+              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link href="/refund" className="hover:text-white transition-colors">Refund Policy</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-white/5 pt-8 flex items-center justify-between">
           <p className="text-sm text-white/30">
-            &copy; {new Date().getFullYear()} Human Leverage AI™. All rights reserved.
+            &copy; 2026 The Human Knowledge Engine
           </p>
           <p className="text-sm text-brand-gold/60">
             Speak Once. Build Forever.
