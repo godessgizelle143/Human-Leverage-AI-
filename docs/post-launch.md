@@ -26,3 +26,5 @@ exists), because it is never told the interview's status.
 - Replace the "HKE AI" logo on login/register/homepage/browser tab with HKE.
 - Replace the 🦋 emoji and drawn crown with sharp PNG art.
 - Theme picker ("Crown" + a second sleeker theme).
+
+- Attorney review of Terms, Privacy, Refund.

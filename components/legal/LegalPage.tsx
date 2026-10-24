@@ -10,11 +10,6 @@ export function ContactLink() {
   return <a href={`mailto:${CONTACT_EMAIL}`} className="link-gold">{CONTACT_EMAIL}</a>
 }
 
-/** A point still to confirm before launch. Shown in pink so it is easy to find and remove. */
-export function Check({ children }: { children?: React.ReactNode }) {
-  return <strong className="font-semibold text-brand-pink">[CHECK{children ? <>: {children}</> : null}]</strong>
-}
-
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-10">

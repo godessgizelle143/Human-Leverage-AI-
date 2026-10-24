@@ -9,8 +9,11 @@ function percent(credit: CreditUsage) {
   return credit.limit ? Math.round((credit.used / credit.limit) * 100) : 0
 }
 
-/** Plan, period, and remaining generation capacity, straight from the subscription row. */
-export default function UsagePanel({ usage, compact = false }: { usage: Usage | null; compact?: boolean }) {
+/**
+ * Plan, period, and remaining generation capacity, straight from the subscription row.
+ * `canManageBilling` adds a "Manage billing" button that opens the Stripe Customer Portal.
+ */
+export default function UsagePanel({ usage, compact = false, canManageBilling = false }: { usage: Usage | null; compact?: boolean; canManageBilling?: boolean }) {
   if (!usage) {
     return (
       <section className="dash-card p-6">
@@ -37,6 +40,12 @@ export default function UsagePanel({ usage, compact = false }: { usage: Usage | 
         <ProgressMeter value={percent(usage.builds)} label={`Build credits · ${creditLabel(usage.builds)}`} showValue={usage.builds.limit !== null} />
       </div>
       <p className="mt-3 text-xs text-brand-faint">A blueprint uses 1 blueprint + 1 build credit. Each generated asset uses 1 build credit. Failed generations are refunded.</p>
+      {canManageBilling && (
+        <form action="/api/billing/portal" method="POST" className="mt-4">
+          <button type="submit" className="btn-gold-outline w-full py-2.5 text-sm">Manage billing</button>
+          <p className="mt-2 text-xs text-brand-faint">Update your card, see invoices, or cancel.</p>
+        </form>
+      )}
     </section>
   )
 }

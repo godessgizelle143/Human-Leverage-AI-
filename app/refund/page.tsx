@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import LegalPage, { Check, ContactLink, Section } from '@/components/legal/LegalPage'
+import LegalPage, { ContactLink, Section } from '@/components/legal/LegalPage'
 
 export const metadata: Metadata = {
   title: 'Refund & Cancellation Policy — The Human Knowledge Engine',
@@ -27,7 +27,7 @@ export default function RefundPage() {
 
       <Section title="Cancel any time">
         <p>You can cancel whenever you like. You keep access until the end of the month you have already paid for. After that, you will not be charged again.</p>
-        <p>To cancel, email <ContactLink /> from the email address on your account and say &ldquo;Please cancel my plan.&rdquo; We will confirm by email. <Check>Replace with the &ldquo;Manage billing&rdquo; button once it is built.</Check></p>
+        <p>To cancel, use <strong className="text-brand-text">Manage billing</strong> on your dashboard. Your plan stays active until the end of your billing period, then stops.</p>
       </Section>
 
       <Section title="Refunds">

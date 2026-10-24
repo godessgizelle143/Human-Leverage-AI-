@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/5 py-12 px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-3 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <BrandMark size="sm" wordmark={false} />
@@ -23,13 +23,6 @@ export default function Footer() {
               <li><a href="/#features" className="hover:text-white transition-colors">Features</a></li>
               <li><a href="/#pricing" className="hover:text-white transition-colors">Pricing</a></li>
               <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-3 text-sm">Company</h4>
-            <ul className="space-y-2 text-sm text-white/40">
-              <li><a href="#" className="hover:text-white transition-colors">About</a></li>
             </ul>
           </div>
 

@@ -32,7 +32,7 @@ export type ProjectAssetRow = Refine<Tables<'project_assets'>, { status: AssetSt
 
 /** The subscription fields the app reads (see SUBSCRIPTION_COLUMNS). */
 export type SubscriptionRow = Refine<
-  Pick<Tables<'subscriptions'>, 'plan' | 'status' | 'interviews_used' | 'builds_used' | 'current_period_end' | 'trial_started_at'>,
+  Pick<Tables<'subscriptions'>, 'plan' | 'status' | 'interviews_used' | 'builds_used' | 'current_period_end' | 'trial_started_at' | 'stripe_subscription_id'>,
   { plan: PlanId; status: SubscriptionStatus }
 >
 
@@ -51,4 +51,4 @@ export const PROJECT_COLUMNS = columns<Tables<'projects'>>()('id', 'user_id', 'i
 export const ASSET_COLUMNS = columns<Tables<'project_assets'>>()('id', 'project_id', 'user_id', 'asset_type', 'title', 'content', 'status', 'version', 'metadata', 'error_message', 'entitlement_state', 'created_at', 'updated_at')
 /** Asset listing without the (potentially large) content body. */
 export const ASSET_SUMMARY_COLUMNS = columns<Tables<'project_assets'>>()('id', 'project_id', 'asset_type', 'title', 'status', 'version', 'error_message', 'created_at', 'updated_at')
-export const SUBSCRIPTION_COLUMNS = columns<Tables<'subscriptions'>>()('plan', 'status', 'interviews_used', 'builds_used', 'current_period_end', 'trial_started_at')
+export const SUBSCRIPTION_COLUMNS = columns<Tables<'subscriptions'>>()('plan', 'status', 'interviews_used', 'builds_used', 'current_period_end', 'trial_started_at', 'stripe_subscription_id')

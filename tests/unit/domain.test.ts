@@ -19,7 +19,7 @@ describe('select lists', () => {
     expect(PROJECT_COLUMNS).toBe('id, user_id, interview_id, title, content, status, archived_at, entitlement_state, created_at, updated_at')
     expect(ASSET_COLUMNS).toBe('id, project_id, user_id, asset_type, title, content, status, version, metadata, error_message, entitlement_state, created_at, updated_at')
     expect(ASSET_SUMMARY_COLUMNS).toBe('id, project_id, asset_type, title, status, version, error_message, created_at, updated_at')
-    expect(SUBSCRIPTION_COLUMNS).toBe('plan, status, interviews_used, builds_used, current_period_end, trial_started_at')
+    expect(SUBSCRIPTION_COLUMNS).toBe('plan, status, interviews_used, builds_used, current_period_end, trial_started_at, stripe_subscription_id')
   })
 })
 
@@ -33,12 +33,12 @@ describe('entitlements', () => {
   })
 
   it('computes remaining credits and access from the subscription row', () => {
-    const usage = usageFor({ plan: 'professional', status: 'trialing', interviews_used: 3, builds_used: 15, current_period_end: future, trial_started_at: null }, false)
+    const usage = usageFor({ plan: 'professional', status: 'trialing', interviews_used: 3, builds_used: 15, current_period_end: future, trial_started_at: null, stripe_subscription_id: null }, false)
     expect(usage).toMatchObject({ active: true, trialing: true, interviews: { remaining: 12 }, builds: { remaining: 0 } })
     expect(canGenerateBlueprint(usage)).toBe(false)
     expect(canGenerateAsset(usage)).toBe(false)
 
-    const expired = usageFor({ plan: 'creator', status: 'active', interviews_used: 0, builds_used: 0, current_period_end: past, trial_started_at: null }, false)
+    const expired = usageFor({ plan: 'creator', status: 'active', interviews_used: 0, builds_used: 0, current_period_end: past, trial_started_at: null, stripe_subscription_id: null }, false)
     expect(expired?.active).toBe(false)
     expect(canGenerateAsset(expired)).toBe(false)
 
@@ -47,7 +47,7 @@ describe('entitlements', () => {
   })
 
   it('treats elite as unlimited', () => {
-    const usage = usageFor({ plan: 'elite', status: 'active', interviews_used: 400, builds_used: 900, current_period_end: null, trial_started_at: null }, false)
+    const usage = usageFor({ plan: 'elite', status: 'active', interviews_used: 400, builds_used: 900, current_period_end: null, trial_started_at: null, stripe_subscription_id: null }, false)
     expect(usage?.builds.remaining).toBeNull()
     expect(canGenerateBlueprint(usage)).toBe(true)
   })

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import LegalPage, { Check, ContactLink, Section } from '@/components/legal/LegalPage'
+import LegalPage, { ContactLink, Section } from '@/components/legal/LegalPage'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — The Human Knowledge Engine',
@@ -40,9 +40,9 @@ export default function PrivacyPage() {
         <ul>
           <li><strong className="text-brand-text">Supabase</strong> stores your account and your saved work, and handles sign-in.</li>
           <li><strong className="text-brand-text">Stripe</strong> handles payments and billing.</li>
-          <li><strong className="text-brand-text">OpenAI</strong> reads your answers to write your blueprint and assets. <Check>OpenAI&apos;s current business terms say data sent through its API is not used to train its models. Confirm this before launch.</Check></li>
+          <li><strong className="text-brand-text">OpenAI</strong> reads your answers to write your blueprint and assets. Under OpenAI&apos;s API terms, this data is not used to train its models.</li>
           <li><strong className="text-brand-text">Vercel</strong> hosts the HKE website and keeps short-term server logs.</li>
-          <li><strong className="text-brand-text">Resend</strong> sends our emails, like sign-up confirmations and password resets. <Check>Confirm Resend is connected as the email sender in Supabase. The HKE app does not call Resend directly.</Check></li>
+          <li><strong className="text-brand-text">Resend</strong> sends our emails, like sign-up confirmations and password resets.</li>
           <li><strong className="text-brand-text">Google</strong>, only if you choose to sign in with Google.</li>
         </ul>
       </Section>
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
 
       <Section title="How long we keep it">
         <p>We keep your information while your account is open. Archiving a project hides it from your lists. It does not delete it.</p>
-        <p>When you ask us to delete your account, we delete your account and your saved work within 30 days. <Check>Confirm 30 days.</Check> Stripe keeps its own payment records, as the law requires.</p>
+        <p>When you ask us to delete your account, we delete your account and your saved work within 30 days. Stripe keeps its own payment records, as the law requires.</p>
       </Section>
 
       <Section title="Your choices">
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
           <li>Ask us to fix something that is wrong.</li>
           <li>Ask us to delete your account and your saved work.</li>
         </ul>
-        <p>To ask, email <ContactLink /> from the email address on your account. We will reply within 30 days. <Check>Confirm 30 days.</Check></p>
+        <p>To ask, email <ContactLink /> from the email address on your account. We will reply within 30 days.</p>
         <p>If you live in California, you have the right to know what we keep, to have it deleted or corrected, and to be treated the same if you use these rights. We do not sell or share your personal information.</p>
       </Section>
 
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="Children">
-        <p>HKE is made for adults. It is not for anyone under 18. <Check>Confirm the minimum age.</Check></p>
+        <p>HKE is made for adults. It is not for anyone under 18.</p>
       </Section>
 
       <Section title="Changes and the law">

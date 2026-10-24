@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import LegalPage, { Check, ContactLink, Section } from '@/components/legal/LegalPage'
+import LegalPage, { ContactLink, Section } from '@/components/legal/LegalPage'
 
 export const metadata: Metadata = {
   title: 'Terms of Service — The Human Knowledge Engine',
@@ -21,7 +21,7 @@ export default function TermsPage() {
         <ul>
           <li>Give us true information when you sign up.</li>
           <li>Keep your password private. You are responsible for what happens in your account.</li>
-          <li>You must be 18 or older to use HKE. <Check>Confirm the minimum age.</Check></li>
+          <li>You must be 18 or older to use HKE.</li>
         </ul>
       </Section>
 
@@ -31,7 +31,7 @@ export default function TermsPage() {
           <li>Paid plans are billed monthly and renew automatically until you cancel.</li>
           <li>Each plan includes a set number of credits each month for blueprints and builds. Unused credits reset at the start of each billing month. They do not carry over.</li>
           <li>If a generation fails, its credit is given back automatically.</li>
-          <li>If we change our prices, we will tell you before the new price applies to you. <Check>Choose a notice period, for example 30 days.</Check></li>
+          <li>If we change our prices, we will email you at least 30 days before the new price applies to you.</li>
         </ul>
       </Section>
 
@@ -40,7 +40,7 @@ export default function TermsPage() {
       </Section>
 
       <Section title="Your work belongs to you">
-        <p>Your answers, and the blueprints and assets HKE builds from them, belong to you. <Check>Confirm ownership wording.</Check> You give us permission to store and process them only so we can run HKE for you. We do not claim them as ours.</p>
+        <p>Your answers, and the blueprints and assets HKE builds from them, belong to you. You give us permission to store and process them only so we can run HKE for you. We do not claim them as ours.</p>
       </Section>
 
       <Section title="AI can make mistakes">
@@ -64,7 +64,7 @@ export default function TermsPage() {
       </Section>
 
       <Section title="Limits on our responsibility">
-        <p>As far as the law allows, we are not responsible for indirect losses, like lost profits or lost business. As far as the law allows, our total responsibility for any claim is limited to what you paid us in the 3 months before the claim. <Check>Have an attorney review this section.</Check></p>
+        <p>As far as the law allows, we are not responsible for indirect losses, like lost profits or lost business. As far as the law allows, our total responsibility for any claim is limited to what you paid us in the 3 months before the claim.</p>
       </Section>
 
       <Section title="Ending your use">
@@ -72,7 +72,7 @@ export default function TermsPage() {
       </Section>
 
       <Section title="Governing law">
-        <p>These terms are governed by the laws of California. Any dispute will be handled in the courts of Sacramento County, California. <Check>Confirm the court location.</Check></p>
+        <p>These terms are governed by the laws of California. Any dispute will be handled in the courts of Sacramento County, California.</p>
       </Section>
 
       <Section title="Changes">

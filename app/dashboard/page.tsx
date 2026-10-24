@@ -329,7 +329,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 <Link href={spotlight.vaultHref} className="link-gold mt-4 inline-block">Open my Vault</Link>
               </section>
             )}
-            <UsagePanel usage={usage} />
+            <UsagePanel usage={usage} canManageBilling={!!subscription?.stripe_subscription_id} />
             <section className="dash-card p-6" aria-labelledby="help-title">
               <h2 id="help-title" className="dash-title text-xl">Need a hand?</h2>
               <p className="mt-3 text-brand-body">No wrong answers here. Write however feels natural.</p>

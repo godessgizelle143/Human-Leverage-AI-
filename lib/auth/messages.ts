@@ -35,6 +35,8 @@ const ERROR_NOTICES: Record<string, DashboardNotice> = {
   'checkout-retry': { tone: 'error', message: 'An earlier checkout for your account is still open, so we did not start a new one. Wait a minute, then choose your plan again.' },
   'checkout-unavailable': { tone: 'error', message: 'Checkout is temporarily unavailable. Please try again in a few minutes.' },
   'invalid-plan': { tone: 'error', message: 'That plan is not available. Please choose one of the plans below.' },
+  'no-billing': { tone: 'info', message: 'You do not have a paid plan yet, so there is no billing to manage.' },
+  'billing-unavailable': { tone: 'error', message: 'Billing is temporarily unavailable. Please try again in a few minutes.' },
 }
 
 /** The notice for `/dashboard?checkout=…` or `/dashboard?error=…`, if any. */
